@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Apprentice's Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c1712; --ink2:#2a221b; --paper:#f2e8d2; --paper2:#e8dbbd; --line:#cbb894;
+  --brass:#b8893b; --brass2:#8a6424; --wax:#8e2b22; --text:#2b231b; --muted:#6d5d48; --ok:#3f6b3a;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--ink);color:var(--text);font:17px/1.65 Lora,Georgia,serif;min-height:100vh}
+h1,h2,h3{font-family:"IM Fell English",Georgia,serif;font-weight:400;margin:0}
+.sc{font-family:"IM Fell English SC",Georgia,serif;letter-spacing:.04em}
+button{font:inherit;cursor:pointer}
+header{color:var(--paper);padding:28px 20px 18px;text-align:center;border-bottom:1px solid #3d3227}
+header .sub{color:#b9a888;font-style:italic;font-size:15px}
+header h1{font-size:34px;line-height:1.15;margin:4px 0}
+.status{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:12px;font-size:15px;color:#d8c9a8}
+.status b{color:var(--brass)}
+.bar{height:6px;background:#3a2f25;border-radius:3px;max-width:420px;margin:12px auto 0;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brass);width:0;transition:width .6s}
+nav{display:flex;justify-content:center;gap:6px;padding:14px 10px 0}
+nav button{background:none;border:1px solid #4a3d30;color:#d8c9a8;padding:6px 16px;border-radius:20px;font-size:15px}
+nav button.on{background:var(--brass);border-color:var(--brass);color:var(--ink)}
+main{max-width:1060px;margin:0 auto;padding:20px 16px 60px}
+.layout{display:grid;grid-template-columns:270px 1fr;gap:22px;align-items:start}
+@media(max-width:760px){.layout{grid-template-columns:1fr}}
+.path{list-style:none;margin:0;padding:0;position:relative}
+.path:before{content:"";position:absolute;left:21px;top:20px;bottom:20px;width:2px;background:#4a3d30}
+.path li{position:relative;display:flex;gap:12px;align-items:center;padding:7px 8px;border-radius:10px;color:#cdbd9c;cursor:pointer}
+.path li.locked{cursor:default;color:#6f6250}
+.path li.sel{background:#2f261e}
+.path li:not(.locked):hover{background:#2a221b}
+.seal{flex:0 0 28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;position:relative;z-index:1;margin-left:7px}
+.locked .seal{background:#2a221b;border:2px solid #4a3d30;color:#6f6250}
+.open .seal{background:var(--ink);border:2px solid var(--brass);color:var(--brass);box-shadow:0 0 0 4px rgba(184,137,59,.18);animation:pulse 2s infinite}
+.done .seal{background:var(--wax);border:2px solid #b4483c;color:#f3d7c9}
+@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(184,137,59,.08)}}
+.path .t{font-size:15px;line-height:1.3}
+.path .n{display:block;font-size:12px;color:#8d7d63}
+.card{background:var(--paper);border-radius:6px;padding:30px 32px;box-shadow:0 1px 0 #fff6 inset,0 10px 30px #0008;position:relative}
+@media(max-width:560px){.card{padding:22px 18px}}
+.card:after{content:"";position:absolute;inset:8px;border:1px solid var(--line);border-radius:3px;pointer-events:none}
+.kicker{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+.card h2{font-size:32px;line-height:1.15;margin:4px 0 14px}
+.letter{font-style:italic;border-left:3px solid var(--brass);padding:2px 0 2px 16px;margin:0 0 20px}
+.letter p{margin:0 0 10px}
+.sig{text-align:right;font-family:"IM Fell English",serif;font-size:18px}
+h3{font-size:22px;margin:24px 0 8px;color:var(--brass2)}
+.bench{margin:0;padding-left:22px}
+.bench li{margin:4px 0}
+.note{background:var(--paper2);border-radius:4px;padding:14px 18px;margin:10px 0;font-size:16px}
+.note p{margin:0 0 8px}.note p:last-child{margin:0}
+.gate{border-top:1px dashed var(--line);margin-top:24px;padding-top:6px}
+.q{margin:14px 0}
+.q .prompt{font-weight:600;margin-bottom:6px}
+.opts{display:grid;gap:6px}
+.opt{text-align:left;background:#fbf5e8;border:1px solid var(--line);border-radius:6px;padding:8px 12px;font-size:16px;color:var(--text)}
+.opt:hover{border-color:var(--brass)}
+.opt.picked{border-color:var(--brass2);background:#f1e2bf}
+.opt.right{border-color:var(--ok);background:#dfe9d6}
+.opt.wrong{border-color:var(--wax);background:#f2d9d3}
+.fb{font-size:15px;margin-top:4px;min-height:1em}
+.fb.bad{color:var(--wax)}.fb.good{color:var(--ok)}
+textarea,input[type=text]{width:100%;font:inherit;font-size:16px;background:#fbf5e8;border:1px solid var(--line);border-radius:6px;padding:9px 12px;color:var(--text)}
+textarea{min-height:76px;resize:vertical}
+input[type=text]:focus,textarea:focus{outline:2px solid var(--brass);border-color:transparent}
+label.chk{display:flex;gap:10px;align-items:flex-start;margin:10px 0;font-size:16px}
+label.chk input{margin-top:6px;accent-color:var(--wax)}
+.btn{background:var(--wax);color:#fbeee6;border:0;border-radius:6px;padding:10px 22px;font-size:17px;margin-top:12px}
+.btn:hover{background:#a5352a}
+.btn.ghost{background:none;color:var(--brass2);border:1px solid var(--brass);padding:7px 16px;font-size:15px}
+.err{color:var(--wax);font-size:15px;margin-top:6px;min-height:1em}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.hints{margin-top:12px}
+.hint{background:#fbf5e8;border-left:3px solid var(--brass);padding:8px 12px;margin:6px 0;font-size:15px;font-style:italic}
+.cipher{font-family:"Courier New",monospace;font-size:17px;letter-spacing:.08em;background:#fbf5e8;border:1px solid var(--line);padding:14px 16px;border-radius:4px;line-height:1.9}
+.donebox{background:#e7ddc4;border-radius:6px;padding:16px 18px;margin-top:22px;text-align:center}
+.donebox .stamp{display:inline-block;border:2px solid var(--wax);color:var(--wax);padding:2px 14px;border-radius:4px;transform:rotate(-4deg);font-family:"IM Fell English SC",serif;font-size:20px}
+.frag{font-family:"IM Fell English",serif;font-style:italic;font-size:20px;margin:12px 0 0}
+table.exp{border-collapse:collapse;margin:8px 0;font-size:15px}
+table.exp td,table.exp th{padding:4px 6px;text-align:center}
+table.exp select{font:inherit;background:#fbf5e8;border:1px solid var(--line);border-radius:4px;padding:3px}
+svg text{font-family:Lora,serif}
+.notebook .entry{border-bottom:1px solid var(--line);padding:12px 0}
+.notebook .entry:last-child{border:0}
+.muted{color:var(--muted);font-size:15px}
+.modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+.modal.on{display:flex}
+.modal .card{max-width:440px;width:100%}
+.flash{animation:flash 1.2s}
+@keyframes flash{0%{transform:scale(.92);opacity:0}60%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
+footer{text-align:center;color:#6f6250;font-size:13px;padding:0 20px 30px}
+</style>
+</head>
+<body>
+<header>
+  <div class="sub sc">The Brassmere Lock Guild</div>
+  <h1>The Apprentice's Ledger</h1>
+  <div class="sub">Chapter One: The First Bench</div>
+  <div class="status"><span>Apprentice: <b id="sName">unregistered</b></span><span>Rank: <b id="sRank">Novice</b></span><span>Seals: <b id="sSeals">0</b> / <span id="sTotal"></span></span></div>
+  <div class="bar"><i id="sBar"></i></div>
+</header>
+<nav>
+  <button data-view="bench" class="on">The bench</button>
+  <button data-view="notebook">Venn's notebook</button>
+  <button data-view="ledger">My ledger</button>
+</nav>
+<main>
+  <section id="vBench" class="layout">
+    <ol class="path" id="path"></ol>
+    <div id="task"></div>
+  </section>
+  <section id="vNotebook" hidden><div class="card notebook" id="notebook"></div></section>
+  <section id="vLedger" hidden><div class="card" id="ledger"></div></section>
+</main>
+<footer>Guild rule: only practise on locks you own, and never on a lock in use.</footer>
+<div class="modal" id="modal"><div class="card" id="modalCard"></div></div>
+
+<script>
+/* ---------- state ---------- */
+const KEY='brassmere-ledger-v1';
+let S={name:'',done:{},journal:{},hints:{},sel:null};
+function load(){try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function h(s){s='brassmere:'+s;let a=0x811c9dc5>>>0;for(const c of s){a^=c.codePointAt(0);a=Math.imul(a,0x01000193)>>>0;}return a.toString(16);}
+const norm=s=>s.toUpperCase().replace(/[^A-Z0-9]/g,'');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- the pin tumbler drawing ---------- */
+const PIN_SVG=`<svg viewBox="0 0 520 262" width="100%" role="img" aria-label="Cross-section of a pin-tumbler lock">
+<rect x="20" y="10" width="480" height="120" rx="6" fill="#d9c8a3" stroke="#8a6424"/>
+<rect x="20" y="130" width="480" height="80" rx="6" fill="#c9b07a" stroke="#8a6424"/>
+<g id="stacks"></g>
+<g id="keyG" style="transition:opacity .4s"><polygon id="keyP" fill="#ece6d8" stroke="#6d5d48"/></g>
+<line x1="20" y1="130" x2="500" y2="130" stroke="#8e2b22" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="398" y="124" font-size="13" fill="#8e2b22">shear line</text>
+<text x="20" y="230" font-size="13" fill="#5a4630">Upper block: the body (fixed). Lower block: the plug (turns).</text>
+<text x="20" y="252" font-size="13" fill="#2b231b" id="pinCap"></text>
+</svg>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="noKey">No key</button><button class="btn ghost" id="withKey">Insert the right key</button><button class="btn ghost" id="wrongKey">Insert a wrong key</button></div>`;
+function pinWidget(root){
+  const X=[110,190,270,350],KP=[30,42,24,36],OFF=[8,0,-10,0];
+  const g=root.querySelector('#stacks');
+  g.innerHTML=X.map((x,i)=>`<g class="stk" style="transition:transform .5s">
+    <path d="M${x} 34 l7 4 l-14 8 l14 8 l-14 8 l14 8 l-14 8 l14 8 l-7 4 L${x} 100" fill="none" stroke="#6d5d48" stroke-width="1.4"/>
+    <rect x="${x-10}" y="100" width="20" height="44" rx="2" fill="#d79a3a" stroke="#8a6424"/>
+    <rect x="${x-10}" y="144" width="20" height="${KP[i]}" rx="5" fill="#8f7fbf" stroke="#4c3f7a"/></g>`).join('');
+  const stks=[...g.querySelectorAll('.stk')],kp=root.querySelector('#keyP'),cap=root.querySelector('#pinCap');
+  function set(mode){
+    const d=X.map((_,i)=>mode==='none'?0:mode==='right'?-14:-14+OFF[i]);
+    stks.forEach((s,i)=>s.style.transform=`translateY(${d[i]}px)`);
+    if(mode==='none'){kp.parentNode.style.opacity=0;cap.textContent='No key: the gold driver pins cross the shear line, so the plug can\'t turn.';return;}
+    const y=X.map((_,i)=>144+KP[i]+d[i]),ridge=Math.min(...y)-4;
+    let p=`60,${ridge} `;X.forEach((x,i)=>{p+=`${x-16},${ridge} ${x-11},${y[i]} ${x+11},${y[i]} ${x+16},${ridge} `;});
+    kp.setAttribute('points',p+`470,${ridge} 470,206 60,206`);kp.parentNode.style.opacity=1;
+    cap.textContent=mode==='right'?'Right key: every gap between pins sits on the shear line. The plug turns.':'Wrong key: some gaps miss the line, so a pin still blocks the plug.';
+  }
+  root.querySelector('#noKey').onclick=()=>set('none');
+  root.querySelector('#withKey').onclick=()=>set('right');
+  root.querySelector('#wrongKey').onclick=()=>set('wrong');
+  set('none');
+}
+
+/* ---------- the chapter ---------- */
+const T=[
+{id:'register',title:'Sign the register',kicker:'Task 1',
+ letter:`<p>So you're the one who wants to learn the trade. Good. We need hands.</p><p>You'll have heard that Isadora Venn, the best lock-maker this city ever had, vanished last week. What you won't have heard is that she left a box in your keeping. It sits locked, and nobody here can open it. Venn wrote that only an apprentice who had worked the First Bench would.</p><p>So: work the bench. Every task you finish earns a wax seal and a page of her notebook. First, sign the register and take the Guild's oath.</p>`,
+ sig:'Tobias Marrow, Master of the First Bench',
+ bench:['Look at your drop point: two pouches locked with brass padlocks, and a box with a combination lock. Don\'t try to open them yet. Each one has its turn.','Write your apprentice name in the register below.','Read the Guild oath. Every locksmith worth anything keeps it.'],
+ notes:`<p><b>The oath.</b> Locksport, the hobby of opening locks for skill, has two rules everywhere it's practised. One: only pick locks you own. Two: never pick a lock that's in use, not even your own front door, because a lock you damage could lock someone out.</p><p>Keep your tools at home. Carrying picks around is how people get into trouble they didn't mean.</p>`,
+ gate:{type:'register'},
+ frag:'A lock is a question asked in brass. The key is one answer. There are others.'},
+{id:'tools',title:'Know your tools',kicker:'Task 2',
+ letter:`<p>Before you touch a lock, you'll know your tools by name. A locksmith who calls everything "the pointy one" breaks things.</p>`,
+ sig:'T. M.',
+ bench:['Lay out your whole kit on a cloth or towel.','Sort it into three piles: tools that lift pins, tools that turn the lock, and tools for something else.','Find the hook, a rake, and the half-diamond (it has a small triangle at the tip).'],
+ notes:`<p><b>Tension wrench.</b> The small bent piece. It goes in the keyway and applies a light turning force to the plug. Without it, nothing opens. Most of picking is in this tool.</p><p><b>Hook.</b> A pick with a small upturned tip, for lifting one pin at a time. This is the real skill tool.</p><p><b>Rakes</b> (wavy or bumpy tips). Scrubbed in and out to jiggle many pins at once. Fast on cheap locks, useless on good ones.</p><p><b>Half-diamond.</b> Lifts single pins or rakes gently. Handy all-rounder.</p><p><b>Broken-key extractors</b> (barbed tips). Not for picking at all: they hook out a key that snapped inside a lock.</p>`,
+ gate:{type:'quiz',qs:[
+  {p:'Which tool applies the turning force to the plug?',o:['The hook','The tension wrench','A rake','The extractor'],a:1},
+  {p:'You want to lift exactly one pin, carefully. Which tool?',o:['A rake','The extractor','The hook','The tension wrench'],a:2},
+  {p:'What are the barbed tools in your kit for?',o:['Raking pins','Removing a broken key','Turning the plug','Opening padlock shackles'],a:1}]},
+ frag:'Every tool is a finger. Learn which finger each one is.'},
+{id:'inside',title:'Look inside',kicker:'Task 3',
+ letter:`<p>Glass locks are for children. That's why you'll use one now, once, to see what you'll later only feel.</p>`,
+ sig:'T. M.',
+ bench:['Take the clear padlock and its key.','Push the key in slowly, one notch at a time, and watch the pins rise and fall.','Count the pin stacks. Look for the line where the inner cylinder (the plug) meets the body.','Turn the key, and watch where the pins split.'],
+ notes:`<p>Each stack has a <b>key pin</b> (bottom, touches the key), a <b>driver pin</b> above it, and a <b>spring</b> on top. The plug can only turn when every gap between key pin and driver pin sits exactly on the <b>shear line</b>. Try it below.</p><div id="pinW"></div>`,
+ gate:{type:'quiz',qs:[
+  {p:'Without a key, what stops the plug from turning?',o:['The springs hold it','Driver pins cross the shear line','The key pins are too long','The shackle is in the way'],a:1},
+  {p:'With the right key in, where are the gaps between the pins?',o:['All at the top of the body','All exactly on the shear line','All at different heights','There are no gaps'],a:1}]},
+ after:pinWidget,
+ frag:'The line between the plug and the body: everything happens there.'},
+{id:'first',title:'First open',kicker:'Task 4',
+ letter:`<p>Now open the glass lock without its key. Watch as much as you like. Nobody's grading your first time.</p>`,
+ sig:'T. M.',
+ bench:['Put the tension wrench in the bottom of the keyway and press very lightly in the direction the key turns. Lighter than you think: about as hard as pressing a key on a keyboard.','Slide the hook to the back pin and lift gently. Work forward pin by pin.','Find the pin that feels stiff. That one is "binding". Lift it until you feel a tiny click and the plug turns a hair.','Repeat until it opens. If everything locks up, release the tension and start again.','Then the real test: open it three times with your eyes closed. Brass won\'t let you look.'],
+ notes:`<p>Why light tension? Too much force and the pins jam so hard you can't lift them, or you push them past the line. Every beginner presses too hard. Every one.</p>`,
+ gate:{type:'journal',ps:['What did it feel like when the lock opened?','With your eyes closed, how did you know a pin had set?']},
+ frag:'Eyes lie about locks. Fingers don\'t.'},
+{id:'brass',title:'The brass pouch',kicker:'Task 5',
+ letter:`<p>A pouch came for you this morning, sealed with a brass padlock. No key came with it. Venn's doing, I'd guess: she never gave anyone a key when a lock would teach them more.</p><p>There's a card inside with a seal code. Bring me the code.</p>`,
+ sig:'T. M.',
+ bench:['Find the first locked pouch at your drop point: the one with the smaller brass lock.','Pick the lock. Try the different tension tools until one fits snugly.','Open the pouch and read the card inside.','Enter the seal code below. Keep the card and the lock: they\'re yours.'],
+ notes:`<p>Brass gives less away than glass, because real locks are made more precisely. If nothing happens, you're almost certainly pressing too hard on the tension wrench.</p><p>Stuck after 20 minutes? Stop, and try again tomorrow. Fresh fingers beat tired ones.</p>`,
+ gate:{type:'code',prompt:'The seal code from the first pouch',hash:'814704f1',hints:['Tension first: try the lightest pressure that still lets the plug turn a hair when a pin sets.','Start with the pin at the back, then work forward. Find the one that feels stiff and lift only that one.','Lost all feeling? Release the tension completely and start again. Every open starts from zero.']},
+ frag:'Brass talks quieter than glass. Listen harder.'},
+{id:'binding',title:'The binding experiment',kicker:'Task 6',
+ letter:`<p>A second pouch, a heavier lock. And a question I've asked every apprentice for thirty years, which most get wrong: if the pin holes were drilled perfectly, picking would be impossible. So why does it work?</p><p>Open the pouch, then use the same lock to find out.</p>`,
+ sig:'T. M.',
+ bench:['Pick the bigger brass lock on the second pouch, and take out what\'s inside.','Then pick the same lock three more times. You can snap it shut without a key.','Each time, note which pin binds first, second, third and so on. Pin 1 is nearest the front of the keyway.','Record the three orders below, answer the question, then enter the seal code from the pouch.'],
+ notes:`<p>Think about it while you pick: if every pin bound at the same moment, could you lift any of them?</p>`,
+ gate:{type:'experiment',code:{prompt:'The seal code from the second pouch',hash:'d5f09ee8',hints:['This lock is a little tighter than the first. Even lighter tension.','Count the pins first: push the hook to the back and gently feel each one on the way out.','Set pins can drop again if your tension slips. Keep it steady while you move between pins.']}},
+ frag:'No lock is made perfectly. That is the whole secret of my trade.'},
+{id:'card',title:'The card from Venn',kicker:'Task 7',
+ letter:`<p>Behind the seal code in the second pouch there should be another card, in Venn's hand. It's nonsense to me. Or it's a code.</p>`,
+ sig:'T. M.',
+ bench:['Take Venn\'s card from the second pouch. The same text is below.','Work out how it was encoded, and decode it.','Answer: where is "the rest" hidden? One word.'],
+ notes:`<div class="cipher">AOL NHAL RLF VWLUZ VUSF OHSM AOL OVBZL<br>AOL YLZA OPKLZ ILOPUK AOL JSVJR<br>AYBZA AOL VUL DOV HZRZ DOF - P.C.</div><p class="muted" style="margin-top:8px">Look at the end of each line. Venn always signed her letters with her initials.</p>`,
+ gate:{type:'code',prompt:'Where is the rest hidden?',hash:'e1220019',hints:['Every letter has been swapped for another letter. The same swap is used throughout.','The last two letters "P.C." are her initials, I.V. How far along the alphabet is P from I?','Each letter has moved 7 places along the alphabet. Shift each one back 7: A becomes T, O becomes H, L becomes E.']},
+ frag:'Seven steps along the alphabet. Remember the number: you will need it again.'},
+{id:'box',title:'Venn\'s box',kicker:'Task 8',
+ letter:`<p>You've worked the whole bench. Venn left one more page, pinned inside the Guild's copy of her notebook. It's about the box at your drop point.</p>`,
+ sig:'T. M.',
+ bench:['Read Venn\'s clues below and work out the four numbers.','Try them on the box\'s combination lock.','Or open the dial lock some other way. Venn would approve.','Enter the code here to close the chapter.'],
+ notes:`<p style="font-style:italic">For the box. Four numbers.</p><ol><li>The first number is the step of my alphabet.</li><li>The second and third numbers are both prime.</li><li>The second is larger than the third.</li><li>The last number is one more than the first.</li><li>All four add up to 20.</li></ol><p style="font-style:italic">Or listen to the dials, if you have the hands for it.</p>`,
+ gate:{type:'code',prompt:'The box\'s code',hash:'3e95cef9',hints:['Start with clue 1. The "step of her alphabet" was in the cipher on the card.','Clues 1 and 4 give you the first and last numbers. Then the middle two must add up to what?','The middle two are primes that add up to 5, and the larger comes first.']},
+ frag:'Some pins are shaped to lie to you. When you can tell their lies from the truth, come and find me. I.V.'}
+];
+document.getElementById('sTotal').textContent=T.length;
+
+/* ---------- rendering ---------- */
+const ranks=[[0,'Novice'],[1,'Registered novice'],[3,'Apprentice'],[5,'Senior apprentice'],[8,'Journeyman of the First Bench']];
+function nDone(){return T.filter(t=>S.done[t.id]).length;}
+function isOpen(i){return i===0||!!S.done[T[i-1].id];}
+function rank(){let r='Novice';for(const[n,name]of ranks)if(nDone()>=n)r=name;return r;}
+function status(){
+  document.getElementById('sName').textContent=S.name||'unregistered';
+  document.getElementById('sRank').textContent=rank();
+  document.getElementById('sSeals').textContent=nDone();
+  document.getElementById('sBar').style.width=(100*nDone()/T.length)+'%';
+}
+function renderPath(){
+  const p=document.getElementById('path');
+  p.innerHTML=T.map((t,i)=>{const st=S.done[t.id]?'done':isOpen(i)?'open':'locked';
+    return `<li class="${st}${S.sel===i?' sel':''}" data-i="${i}"><span class="seal">${st==='done'?'&#10003;':st==='locked'?'&#9679;':i+1}</span><span class="t">${st==='locked'?'Sealed':esc(t.title)}<span class="n">${t.kicker}</span></span></li>`;}).join('');
+  p.querySelectorAll('li').forEach(li=>li.onclick=()=>{const i=+li.dataset.i;if(!isOpen(i))return;S.sel=i;save();renderPath();renderTask();});
+}
+function current(){let i=T.findIndex((t,i)=>!S.done[t.id]&&isOpen(i));return i<0?T.length-1:i;}
+function renderTask(){
+  const i=S.sel==null?current():S.sel,t=T[i],el=document.getElementById('task'),done=!!S.done[t.id];
+  el.innerHTML=`<div class="card flash"><div class="kicker">${t.kicker} of ${T.length}</div><h2>${esc(t.title)}</h2>
+  <div class="letter">${t.letter}<div class="sig">${t.sig}</div></div>
+  <h3>At your bench</h3><ol class="bench">${t.bench.map(b=>`<li>${b}</li>`).join('')}</ol>
+  <h3>Guild notes</h3><div class="note">${t.notes}</div>
+  <div class="gate" id="gate"></div></div>`;
+  if(t.after){const w=el.querySelector('#pinW');w.innerHTML=PIN_SVG;t.after(w);}
+  const g=el.querySelector('#gate');
+  if(done){g.innerHTML=doneBox(t);return;}
+  ({register:gRegister,quiz:gQuiz,journal:gJournal,code:gCode,experiment:gExperiment})[t.gate.type](g,t);
+}
+function doneBox(t){
+  const j=S.journal[t.id],hn=S.hints[t.id]||0;
+  return `<div class="donebox"><span class="stamp">Sealed</span><div class="frag">"${esc(t.frag)}"</div><div class="muted" style="margin-top:6px">A page of Venn's notebook${hn?` &middot; solved with ${hn} hint${hn>1?'s':''}`:''}</div></div>`;
+}
+function complete(t,journal){
+  S.done[t.id]=Date.now();if(journal)S.journal[t.id]=journal;
+  const i=T.indexOf(t);S.sel=i+1<T.length?i+1:i;save();status();renderPath();
+  showModal(t,i);
+}
+function showModal(t,i){
+  const last=i===T.length-1,m=document.getElementById('modal');
+  document.getElementById('modalCard').innerHTML=`<div class="kicker">Seal earned</div><h2>${esc(t.title)}</h2>
+   <p>You've earned a page of Venn's notebook:</p><div class="frag">"${esc(t.frag)}"</div>
+   ${last?`<p style="margin-top:16px"><b>Chapter One is complete.</b> You are now a Journeyman of the First Bench. Open the box: whatever's inside is yours.</p><p class="muted">Chapter Two: <i>The Lying Pins</i>, is being written.</p>`:`<p class="muted" style="margin-top:14px">Next: ${esc(T[i+1].title)}</p>`}
+   <button class="btn" id="mClose">${last?'Close the ledger':'To the next task'}</button>`;
+  m.classList.add('on');document.getElementById('mClose').onclick=()=>{m.classList.remove('on');renderTask();window.scrollTo({top:0,behavior:'smooth'});};
+}
+
+/* ---------- gates ---------- */
+function gRegister(g,t){
+  g.innerHTML=`<h3>Sign the register</h3><input type="text" id="nm" placeholder="Your apprentice name" maxlength="40" value="${esc(S.name)}">
+  <label class="chk"><input type="checkbox" id="o1"> I will only practise on locks I own.</label>
+  <label class="chk"><input type="checkbox" id="o2"> I will never pick a lock that's in use.</label>
+  <button class="btn" id="go">Sign and take the oath</button><div class="err" id="er"></div>`;
+  const nm=g.querySelector('#nm'),er=g.querySelector('#er');
+  [nm,g.querySelector('#o1'),g.querySelector('#o2')].forEach(x=>x.oninput=x.onchange=()=>er.textContent='');
+  g.querySelector('#go').onclick=()=>{
+    if(nm.value.trim().length<2){er.textContent='Write your apprentice name first.';return;}
+    if(!g.querySelector('#o1').checked||!g.querySelector('#o2').checked){er.textContent='The Guild only signs apprentices who take both parts of the oath.';return;}
+    S.name=nm.value.trim();complete(t);};
+}
+function gQuiz(g,t){
+  const picks=t.gate.qs.map(()=>null);
+  g.innerHTML=`<h3>Prove it</h3>`+t.gate.qs.map((q,qi)=>`<div class="q" data-q="${qi}"><div class="prompt">${qi+1}. ${q.p}</div><div class="opts">${q.o.map((o,oi)=>`<button class="opt" data-o="${oi}">${o}</button>`).join('')}</div><div class="fb"></div></div>`).join('')+`<button class="btn" id="go">Check my answers</button><div class="err" id="er"></div>`;
+  g.querySelectorAll('.q').forEach(qd=>{const qi=+qd.dataset.q;qd.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{qd.querySelectorAll('.opt').forEach(x=>x.className='opt');b.classList.add('picked');picks[qi]=+b.dataset.o;qd.querySelector('.fb').textContent='';g.querySelector('#er').textContent='';});});
+  g.querySelector('#go').onclick=()=>{
+    if(picks.some(p=>p==null)){g.querySelector('#er').textContent='Answer every question first.';return;}
+    let ok=true;
+    g.querySelectorAll('.q').forEach(qd=>{const qi=+qd.dataset.q,q=t.gate.qs[qi],fb=qd.querySelector('.fb'),b=qd.querySelector(`.opt[data-o="${picks[qi]}"]`);
+      if(picks[qi]===q.a){b.className='opt right';fb.className='fb good';fb.textContent='Right.';}
+      else{ok=false;b.className='opt wrong';fb.className='fb bad';fb.textContent='Not quite. Check the Guild notes and try again.';}});
+    if(ok)setTimeout(()=>complete(t),600);};
+}
+function gJournal(g,t){
+  g.innerHTML=`<h3>Write it in your ledger</h3>`+t.gate.ps.map((p,i)=>`<div class="q"><div class="prompt">${p}</div><textarea data-i="${i}"></textarea></div>`).join('')+
+  `<label class="chk"><input type="checkbox" id="did"> I really did this at my bench.</label><button class="btn" id="go">Seal it</button><div class="err" id="er"></div>`;
+  const er=g.querySelector('#er');g.querySelectorAll('textarea,input').forEach(x=>x.oninput=x.onchange=()=>er.textContent='');
+  g.querySelector('#go').onclick=()=>{
+    const ans=[...g.querySelectorAll('textarea')].map(x=>x.value.trim());
+    if(ans.some(a=>a.length<4)){er.textContent='Write a few words for each question. Future you will want to read them.';return;}
+    if(!g.querySelector('#did').checked){er.textContent='Tick the box once you\'ve actually done it.';return;}
+    complete(t,t.gate.ps.map((p,i)=>({p,a:ans[i]})));};
+}
+function gCode(g,t,gate,extra){
+  gate=gate||t.gate;const used=()=>S.hints[t.id]||0;
+  g.innerHTML=`<h3>${gate.prompt}</h3><input type="text" id="ans" autocomplete="off" placeholder="Your answer"><button class="btn" id="go">Try it</button><div class="err" id="er"></div>
+   <div class="hints" id="hs"></div><button class="btn ghost" id="hb">Ask Tobias for a hint</button>`;
+  const ans=g.querySelector('#ans'),er=g.querySelector('#er'),hs=g.querySelector('#hs'),hb=g.querySelector('#hb');
+  function showHints(){hs.innerHTML=gate.hints.slice(0,used()).map(x=>`<div class="hint">${x}</div>`).join('');hb.style.display=used()>=gate.hints.length?'none':'';hb.textContent=used()?'Another hint':'Ask Tobias for a hint';}
+  showHints();
+  hb.onclick=()=>{S.hints[t.id]=used()+1;save();showHints();};
+  ans.oninput=()=>er.textContent='';
+  const go=()=>{const v=norm(ans.value).replace(/^(BEHINDTHE|BEHIND|THE)(?=.)/,'');if(!v){er.textContent='Type an answer first.';return;}
+    if(h(v)===gate.hash){complete(t,(extra||[]).concat([{p:gate.prompt,a:ans.value.trim()}]));}
+    else{er.textContent='That doesn\'t open it.';g.querySelector('#ans').classList.remove('shake');void ans.offsetWidth;ans.classList.add('shake');}};
+  g.querySelector('#go').onclick=go;ans.onkeydown=e=>{if(e.key==='Enter')go();};
+}
+function gExperiment(g,t){
+  g.innerHTML=`<h3>Record your trials</h3><p class="muted">Pins in this lock: <select id="np"><option>4</option><option>5</option></select></p><div id="tb"></div>
+   <div class="q" id="why" hidden><div class="prompt">Why does one pin bind before the others?</div><div class="opts">
+   ${['The springs are different strengths','The pin holes are not perfectly in a straight line, so the plug catches one pin first','The front pin is always the tightest','The key pins are made of different metals'].map((o,i)=>`<button class="opt" data-o="${i}">${o}</button>`).join('')}</div><div class="fb"></div></div>
+   <button class="btn" id="go">Compare my trials</button><div class="err" id="er"></div>`;
+  const np=g.querySelector('#np'),tb=g.querySelector('#tb'),er=g.querySelector('#er'),why=g.querySelector('#why');
+  function table(){const n=+np.value;tb.innerHTML=`<table class="exp"><tr><th></th>${[...Array(n)].map((_,k)=>`<th>${['1st','2nd','3rd','4th','5th'][k]}</th>`).join('')}</tr>`+
+    [0,1,2].map(r=>`<tr><th>Trial ${r+1}</th>${[...Array(n)].map((_,k)=>`<td><select data-r="${r}" data-k="${k}"><option value="">-</option>${[...Array(n)].map((_,p)=>`<option>${p+1}</option>`).join('')}</select></td>`).join('')}</tr>`).join('')+`</table><p class="muted">Write the pin number (1 = front) in the order the pins bound.</p>`;
+    tb.querySelectorAll('select').forEach(s=>s.onchange=()=>er.textContent='');}
+  np.onchange=()=>{table();why.hidden=true;};table();
+  let stage=0,pick=null,orders=[];
+  why.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{why.querySelectorAll('.opt').forEach(x=>x.className='opt');b.classList.add('picked');pick=+b.dataset.o;why.querySelector('.fb').textContent='';});
+  g.querySelector('#go').onclick=()=>{
+    if(stage===0){const n=+np.value;orders=[0,1,2].map(r=>[...tb.querySelectorAll(`select[data-r="${r}"]`)].map(s=>s.value));
+      if(orders.some(o=>o.some(v=>!v))){er.textContent='Fill in all three trials first.';return;}
+      if(orders.some(o=>new Set(o).size!==n)){er.textContent='Each trial should list every pin exactly once.';return;}
+      const same=orders.every(o=>o.join()===orders[0].join());
+      er.className='fb good';er.textContent=same?'All three trials agree: the pins bound in the same order every time. So the order belongs to the lock, not to luck.':'Your trials differ a little. That happens: tension changes things. But look how often the same pin binds first.';
+      why.hidden=false;stage=1;g.querySelector('#go').textContent='Answer and seal it';return;}
+    if(pick==null){er.className='err';er.textContent='Choose an answer to the question.';return;}
+    const fb=why.querySelector('.fb');
+    if(pick===1){fb.className='fb good';fb.textContent='Exactly. No lock is made perfectly. The holes are a fraction of a millimetre out of line, so under tension the plug catches one pin at a time. Find it, set it, find the next.';
+      const go=g.querySelector('#go');go.style.display='none';er.textContent='';const box=document.createElement('div');g.appendChild(box);gCode(box,t,t.gate.code,orders.map((o,i)=>({p:'Trial '+(i+1),a:o.join(' - ')})));}
+    else{fb.className='fb bad';fb.textContent='Not quite. Ask yourself: if every pin were exactly in line, which one would bind first?';}
+  };
+}
+
+/* ---------- notebook & ledger ---------- */
+function renderNotebook(){
+  const got=T.filter(t=>S.done[t.id]);
+  document.getElementById('notebook').innerHTML=`<div class="kicker">Collected pages</div><h2>Venn's notebook</h2>`+
+   (got.length?got.map((t,i)=>`<div class="entry"><div class="muted">Page ${i+1} &middot; from "${esc(t.title)}"</div><div class="frag">"${esc(t.frag)}"</div></div>`).join(''):`<p>No pages yet. Every seal you earn adds one.</p>`)+
+   (got.length<T.length?`<p class="muted">${T.length-got.length} pages still sealed.</p>`:'');
+}
+function renderLedger(){
+  const rows=T.filter(t=>S.journal[t.id]).map(t=>`<div class="entry" style="border-bottom:1px solid var(--line);padding:10px 0"><b>${esc(t.title)}</b> <span class="muted">${new Date(S.done[t.id]).toLocaleDateString()}</span>${S.journal[t.id].map(x=>`<div class="muted" style="margin-top:4px">${esc(x.p)}</div><div>${esc(x.a)}</div>`).join('')}</div>`).join('');
+  document.getElementById('ledger').innerHTML=`<div class="kicker">${esc(S.name||'Unregistered apprentice')}</div><h2>My ledger</h2>${rows||'<p>Your notes from the bench will appear here.</p>'}
+   <h3>Keep your progress safe</h3><p class="muted">Your progress is saved in this browser only. Copy this save code somewhere safe; paste it back to restore your progress on another device.</p>
+   <textarea id="code" readonly></textarea><button class="btn ghost" id="cp">Copy save code</button>
+   <h3>Restore</h3><textarea id="rst" placeholder="Paste a save code here"></textarea><button class="btn ghost" id="rs">Restore progress</button><div class="err" id="er"></div>`;
+  const code=btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+  document.getElementById('code').value=code;
+  document.getElementById('cp').onclick=async()=>{try{await navigator.clipboard.writeText(code);document.getElementById('cp').textContent='Copied';}catch(e){const c=document.getElementById('code');c.select();document.getElementById('cp').textContent='Selected: press Ctrl+C';}};
+  document.getElementById('rs').onclick=()=>{const er=document.getElementById('er');
+    try{const o=JSON.parse(decodeURIComponent(escape(atob(document.getElementById('rst').value.trim()))));if(!o||typeof o.done!=='object')throw 0;S=Object.assign({name:'',done:{},journal:{},hints:{},sel:null},o);save();status();renderPath();renderTask();renderLedger();document.getElementById('er').className='fb good';document.getElementById('er').textContent='Progress restored.';}
+    catch(e){er.className='err';er.textContent='That save code didn\'t work. Check you pasted all of it.';}};
+}
+
+/* ---------- views ---------- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  const v=b.dataset.view;document.getElementById('vBench').hidden=v!=='bench';document.getElementById('vNotebook').hidden=v!=='notebook';document.getElementById('vLedger').hidden=v!=='ledger';
+  if(v==='notebook')renderNotebook();if(v==='ledger')renderLedger();});
+load();if(S.sel!=null&&!isOpen(S.sel))S.sel=null;status();renderPath();renderTask();
+</script>
+</body>
+</html>

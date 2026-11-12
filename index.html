@@ -97,6 +97,46 @@ svg text{font-family:Lora,serif}
 .modal .card{max-width:440px;width:100%}
 .flash{animation:flash 1.2s}
 @keyframes flash{0%{transform:scale(.92);opacity:0}60%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
+.today{background:#2a221b;border:1px solid #4a3d30;border-radius:6px;color:#e6d8b8;padding:16px 18px;margin-bottom:18px;font-size:15px}
+.today h4{font-family:"IM Fell English",serif;font-weight:400;font-size:18px;color:var(--brass);margin:0 0 6px}
+.today p{margin:0 0 6px}.today .muted{color:#a8977a;font-size:14px}
+.streak{display:flex;align-items:center;gap:14px;border-bottom:1px solid #4a3d30;padding-bottom:12px;margin-bottom:12px}
+.streak .big{font-size:30px;line-height:1;color:var(--brass);font-family:"IM Fell English",serif}
+@keyframes flick{50%{transform:scaleY(1.06) rotate(-2deg)}}
+.todo{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:#cdbd9c}
+.tick{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1.5px solid #6f6250;font-size:12px;margin-left:6px}
+.tick.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:900px){.tgrid{grid-template-columns:1fr}}
+.dq{margin-bottom:8px}
+.opts.small .opt{font-size:14px;padding:6px 10px;background:#3a2f25;color:#e6d8b8;border-color:#5a4a39}
+.opts.small .opt:hover{border-color:var(--brass)}
+.today .fb.good{color:#9fcf8f}.today .fb.bad{color:#e49a8c}
+.prow{display:flex;flex-wrap:wrap;gap:6px}.prow select{font:inherit;font-size:14px;background:#3a2f25;color:#e6d8b8;border:1px solid #5a4a39;border-radius:4px;padding:5px}
+.btn.small{font-size:14px;padding:6px 14px;margin-top:0}
+.today .err{color:#e49a8c;font-size:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,40px);opacity:0;background:var(--brass);color:var(--ink);padding:8px 18px;border-radius:20px;font-size:15px;transition:.3s;z-index:20;pointer-events:none}
+.toast.on{transform:translate(-50%,0);opacity:1}
+.marks{background:#e7ddc4;border-radius:6px;padding:10px 14px;margin:6px 0 14px;font-size:15px}
+.marks div{display:flex;justify-content:space-between;padding:2px 0}.marks .tot{border-top:1px solid var(--line);margin-top:4px;padding-top:6px;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 6px}
+@media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stats div{background:var(--paper2);border-radius:6px;padding:10px;text-align:center}
+.stats b{display:block;font-size:24px;font-family:"IM Fell English",serif;color:var(--brass2)}.stats span{font-size:13px;color:var(--muted)}
+table.log{border-collapse:collapse;width:100%;font-size:15px}table.log td{padding:4px 6px;border-bottom:1px solid var(--line)}
+.layout{grid-template-areas:"path main" "daily main";grid-template-rows:auto 1fr}
+.aPath{grid-area:path}.aMain{grid-area:main;min-width:0}.aDaily{grid-area:daily}
+@media(max-width:760px){.layout{grid-template-areas:"main" "daily" "path";grid-template-rows:auto}}
+.dbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#2a221b;border:1px solid #4a3d30;border-radius:6px;color:#e6d8b8;padding:8px 14px;margin-bottom:14px;font-size:15px}
+.dbar .sk b{font-size:20px;color:var(--brass);font-family:"IM Fell English",serif}
+.dbar .warn{color:#a8977a;font-size:13px}
+.dbar .ticks{display:flex;gap:12px}.dbar .ti{display:flex;align-items:center;gap:5px;color:#cdbd9c}.dbar .tick{margin-left:0}
+.dbar .tl{margin-left:auto;color:#cdbd9c}
+.flame svg path{fill:none;stroke:#7a6a52;stroke-width:1.6;stroke-dasharray:3 2}
+.flame.lit svg path{fill:url(#fl);stroke:#b8402c;stroke-dasharray:none}
+.flame.lit svg{filter:drop-shadow(0 0 5px #e88a2e88);animation:flick 1.6s infinite;transform-origin:50% 90%}
+.aDaily{margin-top:18px}.aDaily .today{margin-bottom:0}
+.dh{font-size:21px!important;margin-bottom:2px!important}
 footer{text-align:center;color:#6f6250;font-size:13px;padding:0 20px 30px}
 </style>
 </head>
@@ -105,7 +145,7 @@ footer{text-align:center;color:#6f6250;font-size:13px;padding:0 20px 30px}
   <div class="sub sc">The Brassmere Lock Guild</div>
   <h1>The Apprentice's Ledger</h1>
   <div class="sub">Chapter One: The First Bench</div>
-  <div class="status"><span>Apprentice: <b id="sName">unregistered</b></span><span>Rank: <b id="sRank">Novice</b></span><span>Seals: <b id="sSeals">0</b> / <span id="sTotal"></span></span></div>
+  <div class="status"><span>Apprentice: <b id="sName">unregistered</b></span><span>Rank: <b id="sRank">Novice</b></span><span>Marks: <b id="sMarks">0</b></span><span>Streak: <b id="sStreak">0 days</b></span><span>Seals: <b id="sSeals">0</b> / <span id="sTotal"></span></span></div>
   <div class="bar"><i id="sBar"></i></div>
 </header>
 <nav>
@@ -115,24 +155,40 @@ footer{text-align:center;color:#6f6250;font-size:13px;padding:0 20px 30px}
 </nav>
 <main>
   <section id="vBench" class="layout">
-    <ol class="path" id="path"></ol>
-    <div id="task"></div>
+    <div class="aPath"><ol class="path" id="path"></ol></div>
+    <div class="aMain"><div id="today"></div><div id="task"></div></div>
+    <div class="aDaily" id="daily"></div>
   </section>
   <section id="vNotebook" hidden><div class="card notebook" id="notebook"></div></section>
   <section id="vLedger" hidden><div class="card" id="ledger"></div></section>
 </main>
 <footer>Guild rule: only practise on locks you own, and never on a lock in use.</footer>
+<div class="toast" id="toast" role="status"></div>
 <div class="modal" id="modal"><div class="card" id="modalCard"></div></div>
 
 <script>
 /* ---------- state ---------- */
 const KEY='brassmere-ledger-v1';
-let S={name:'',done:{},journal:{},hints:{},sel:null};
-function load(){try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}}
+const PACING=location.hash!=='#workshop';   /* designer test mode: open the page with #workshop to skip the one-task-a-day rule */
+let S={name:'',done:{},journal:{},hints:{},sel:null,marks:[],days:{},wrong:{}};
+function load(){try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
+  S.marks=S.marks||[];S.days=S.days||{};S.wrong=S.wrong||{};}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function h(s){s='brassmere:'+s;let a=0x811c9dc5>>>0;for(const c of s){a^=c.codePointAt(0);a=Math.imul(a,0x01000193)>>>0;}return a.toString(16);}
 const norm=s=>s.toUpperCase().replace(/[^A-Z0-9]/g,'');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- days, streak, marks ---------- */
+function dayKey(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function today(){const k=dayKey();return S.days[k]||(S.days[k]={});}
+function touch(kind){today()[kind]=true;save();}
+function active(k){const d=S.days[k];return !!(d&&(d.task||d.practice||d.q));}
+function streak(){let n=0;const d=new Date();if(!active(dayKey(d)))d.setDate(d.getDate()-1);
+  while(active(dayKey(d))){n++;d.setDate(d.getDate()-1);}return n;}
+function totalMarks(){return S.marks.reduce((a,m)=>a+m.p,0);}
+function award(p,why){if(p<=0)return;S.marks.push({p,why,d:dayKey()});save();toast('+'+p+' marks: '+why);}
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600);}
 
 /* ---------- the pin tumbler drawing ---------- */
 const PIN_SVG=`<svg viewBox="0 0 520 262" width="100%" role="img" aria-label="Cross-section of a pin-tumbler lock">
@@ -236,26 +292,101 @@ const T=[
 ];
 document.getElementById('sTotal').textContent=T.length;
 
-/* ---------- rendering ---------- */
+/* ---------- daily review questions (only from tasks already sealed) ---------- */
+const REVIEW=[
+ {req:'register',q:'Which lock may a Guild apprentice practise on?',o:['Any lock, as long as it isn\'t damaged','Only locks they own that aren\'t in use','Only locks at school','Any lock with permission from a friend'],a:1,why:'The two rules of locksport: only locks you own, and never a lock in use.'},
+ {req:'tools',q:'Which tool lifts one pin at a time?',o:['A rake','The hook','The tension wrench','The extractor'],a:1,why:'The hook lifts single pins. Rakes jiggle many pins at once.'},
+ {req:'tools',q:'What are rakes best at?',o:['High-security locks','Quickly jiggling many pins in cheap locks','Removing broken keys','Applying tension'],a:1,why:'Rakes are fast on cheap locks and nearly useless on good ones.'},
+ {req:'inside',q:'What sits on top of each driver pin?',o:['A key pin','A spring','The shear line','Nothing'],a:1,why:'A spring pushes the driver pin down, so the pins rest across the shear line.'},
+ {req:'inside',q:'Which pin touches the key?',o:['The driver pin','The key pin','The spring pin','The shear pin'],a:1,why:'The key pin sits at the bottom of each stack and rides on the key.'},
+ {req:'inside',q:'When can the plug turn?',o:['When the springs are compressed','When every gap between pins sits on the shear line','When the key is pushed all the way in','When the driver pins are below the shear line'],a:1,why:'Every stack must split exactly at the shear line. One blocked pin is enough to stop it.'},
+ {req:'first',q:'What\'s the most common beginner mistake?',o:['Too little tension','Too much tension','Using the hook','Starting at the back pin'],a:1,why:'Too much tension jams the pins. Use about the force of pressing a keyboard key.'},
+ {req:'first',q:'A "binding" pin is one that...',o:['Is broken','Feels stiff under tension','Has no spring','Has already set'],a:1,why:'Under tension, the plug catches one pin first. That pin feels stiff, and it\'s the one to lift.'},
+ {req:'brass',q:'Why does a brass lock give less feedback than the clear one?',o:['Brass is softer','It\'s made more precisely, with tighter tolerances','It has fewer pins','It has no springs'],a:1,why:'Better manufacturing means smaller gaps, so the signals your fingers read are smaller.'},
+ {req:'binding',q:'Why can pin-tumbler locks be picked at all?',o:['The springs are weak','The pin holes aren\'t perfectly in line','Keys are badly cut','The plug is loose'],a:1,why:'Tiny misalignments mean the pins bind one at a time, so a picker can set them one by one.'},
+ {req:'binding',q:'Adding a pin to a lock...',o:['Doubles the picking time','Multiplies the number of possible keys, but only adds a little picking time','Makes it unpickable','Changes nothing'],a:1,why:'Keys must be right all at once, so possibilities multiply. A picker works one pin at a time, so time only adds up.'},
+ {req:'card',q:'In a Caesar cipher, every letter...',o:['Is replaced by a random letter','Moves the same number of places along the alphabet','Is reversed','Is replaced by a number'],a:1,why:'One shift for the whole message. That\'s exactly why it\'s easy to break.'},
+ {req:'card',q:'How many useful Caesar shifts does the English alphabet have?',o:['5','25','26','100'],a:1,why:'26 letters, but a shift of 0 (or 26) changes nothing, so 25 useful shifts. Few enough to just try them all.'}
+];
+
+/* ---------- task availability ---------- */
 const ranks=[[0,'Novice'],[1,'Registered novice'],[3,'Apprentice'],[5,'Senior apprentice'],[8,'Journeyman of the First Bench']];
 function nDone(){return T.filter(t=>S.done[t.id]).length;}
-function isOpen(i){return i===0||!!S.done[T[i-1].id];}
+function st(i){
+  if(S.done[T[i].id])return 'done';
+  if(i===0)return 'open';
+  const prev=S.done[T[i-1].id];if(!prev)return 'locked';
+  if(i<=3||!PACING)return 'open';   /* the first four tasks are the induction: all on day one */
+  return dayKey(new Date(prev))===dayKey()?'tomorrow':'open';
+}
+const isOpen=i=>st(i)==='open'||st(i)==='done';
 function rank(){let r='Novice';for(const[n,name]of ranks)if(nDone()>=n)r=name;return r;}
 function status(){
   document.getElementById('sName').textContent=S.name||'unregistered';
   document.getElementById('sRank').textContent=rank();
   document.getElementById('sSeals').textContent=nDone();
+  document.getElementById('sMarks').textContent=totalMarks();
+  document.getElementById('sStreak').textContent=streak()+(streak()===1?' day':' days');
   document.getElementById('sBar').style.width=(100*nDone()/T.length)+'%';
 }
 function renderPath(){
   const p=document.getElementById('path');
-  p.innerHTML=T.map((t,i)=>{const st=S.done[t.id]?'done':isOpen(i)?'open':'locked';
-    return `<li class="${st}${S.sel===i?' sel':''}" data-i="${i}"><span class="seal">${st==='done'?'&#10003;':st==='locked'?'&#9679;':i+1}</span><span class="t">${st==='locked'?'Sealed':esc(t.title)}<span class="n">${t.kicker}</span></span></li>`;}).join('');
+  p.innerHTML=T.map((t,i)=>{const s=st(i);
+    const label=s==='locked'?'Sealed':esc(t.title),sub=s==='tomorrow'?'Opens tomorrow':t.kicker;
+    return `<li class="${s==='tomorrow'?'locked':s}${S.sel===i?' sel':''}" data-i="${i}"><span class="seal">${s==='done'?'&#10003;':s==='open'?i+1:'&#9679;'}</span><span class="t">${label}<span class="n">${sub}</span></span></li>`;}).join('');
   p.querySelectorAll('li').forEach(li=>li.onclick=()=>{const i=+li.dataset.i;if(!isOpen(i))return;S.sel=i;save();renderPath();renderTask();});
 }
-function current(){let i=T.findIndex((t,i)=>!S.done[t.id]&&isOpen(i));return i<0?T.length-1:i;}
+function current(){
+  for(let i=0;i<T.length;i++){const s=st(i);if(s==='open')return {i};if(s==='tomorrow')return {wait:i};}
+  return {i:T.length-1};
+}
+
+/* ---------- daily bar (top) and daily bench card (side) ---------- */
+const FLAME=`<svg viewBox="0 0 24 30" width="22" height="28" aria-hidden="true"><defs><linearGradient id="fl" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#b8402c"/><stop offset=".55" stop-color="#e88a2e"/><stop offset="1" stop-color="#ffd36b"/></linearGradient></defs><path d="M12 1c2 6 9 9 9 17a9 9 0 0 1-18 0c0-5 3-7 4-11 1 3 2 5 4 6 0-5-1-8 1-12z"/></svg>`;
+function renderToday(){
+  const d=today(),sk=streak(),lit=!!(d.task||d.practice||d.q);
+  const pool=REVIEW.map((q,i)=>({...q,i})).filter(q=>S.done[q.req]);
+  const c=current();let tLine;
+  if(nDone()===T.length)tLine='Chapter One complete';
+  else if(c.wait!=null)tLine=`Next task opens tomorrow`;
+  else tLine=`Open now: <b>${esc(T[c.i].title)}</b>`;
+  const tick=(b,l)=>`<span class="ti"><span class="tick ${b?'on':''}">${b?'&#10003;':''}</span>${l}</span>`;
+  document.getElementById('today').innerHTML=`<div class="dbar">
+    <span class="flame ${lit?'lit':''}" title="${lit?'Today\'s flame is lit':'Light today\'s flame: answer the question, log practice or seal a task'}">${FLAME}</span>
+    <span class="sk"><b>${sk}</b> day streak</span>
+    <span class="ticks">${tick(d.q,'Question')}${tick(d.practice,'Practice')}${tick(d.task,'Task')}</span>
+    <span class="tl">${tLine}</span></div>`;
+  let qHtml;
+  if(!pool.length)qHtml=`<p class="muted">Sign the register to unlock daily questions.</p>`;
+  else if(d.q){const q=REVIEW[d.q.i];qHtml=`<div class="dq">${esc(q.q)}</div><div class="fb ${d.q.ok?'good':'bad'}">${d.q.ok?'Right. +10 marks.':'Not this time. The answer: '+esc(q.o[q.a])+'.'}</div><div class="muted">${esc(q.why)}</div>`;}
+  else{const n=Math.floor(new Date(dayKey()).getTime()/864e5),q=pool[n%pool.length];
+    qHtml=`<div class="dq">${esc(q.q)}</div><div class="opts small">${q.o.map((o,oi)=>`<button class="opt" data-qi="${q.i}" data-o="${oi}">${esc(o)}</button>`).join('')}</div>`;}
+  let pHtml;
+  if(d.practice)pHtml=`<p>Logged: ${esc(d.practice.min)} on ${esc(d.practice.lock)}. +10 marks.</p>`;
+  else pHtml=`<div class="prow"><select id="pLock"><option value="">Which lock?</option><option>the clear lock</option><option>the 30 mm Master Lock</option><option>the 40 mm Master Lock</option><option>another lock</option></select>
+    <select id="pMin"><option value="">How long?</option><option>5 minutes</option><option>10 minutes</option><option>20 minutes</option><option>30+ minutes</option></select>
+    <button class="btn small" id="pGo">Log it</button></div><div class="err" id="pEr"></div>`;
+  const el=document.getElementById('daily');
+  el.innerHTML=`<div class="today"><h4 class="dh">Daily bench</h4><p class="muted">Either of these keeps your streak alive.</p>
+    <h4>Question of the day</h4>${qHtml}<h4 style="margin-top:14px">Bench practice</h4>${pHtml}</div>`;
+  el.querySelectorAll('.opt[data-qi]').forEach(b=>b.onclick=()=>{const qi=+b.dataset.qi,ok=+b.dataset.o===REVIEW[qi].a;
+    d.q={i:qi,ok};save();if(ok)award(10,'question of the day');refresh();});
+  const go=el.querySelector('#pGo');
+  if(go)go.onclick=()=>{const l=el.querySelector('#pLock').value,m=el.querySelector('#pMin').value;
+    if(!l||!m){el.querySelector('#pEr').textContent='Choose the lock and how long first.';return;}
+    d.practice={lock:l,min:m};save();award(10,'bench practice');refresh();};
+}
+function refresh(){status();renderPath();renderToday();}
+
+/* ---------- task view ---------- */
 function renderTask(){
-  const i=S.sel==null?current():S.sel,t=T[i],el=document.getElementById('task'),done=!!S.done[t.id];
+  const el=document.getElementById('task'),c=current();
+  let i=(S.sel!=null&&isOpen(S.sel))?S.sel:c.i;
+  if(i==null){const w=T[c.wait];
+    el.innerHTML=`<div class="card flash"><div class="kicker">${w.kicker} of ${T.length}</div><h2>${esc(w.title)}</h2>
+     <div class="letter"><p>That's enough for one day. A locksmith who rushes breaks pins, and fingers learn while you sleep.</p><p>Come back tomorrow and this task will be waiting. Until then, practise on the locks you've already opened.</p><div class="sig">T. M.</div></div>
+     <p class="muted">Finished tasks stay open: click any sealed task on the left to read it again.</p></div>`;return;}
+  const t=T[i],done=!!S.done[t.id];
   el.innerHTML=`<div class="card flash"><div class="kicker">${t.kicker} of ${T.length}</div><h2>${esc(t.title)}</h2>
   <div class="letter">${t.letter}<div class="sig">${t.sig}</div></div>
   <h3>At your bench</h3><ol class="bench">${t.bench.map(b=>`<li>${b}</li>`).join('')}</ol>
@@ -267,20 +398,27 @@ function renderTask(){
   ({register:gRegister,quiz:gQuiz,journal:gJournal,code:gCode,experiment:gExperiment})[t.gate.type](g,t);
 }
 function doneBox(t){
-  const j=S.journal[t.id],hn=S.hints[t.id]||0;
-  return `<div class="donebox"><span class="stamp">Sealed</span><div class="frag">"${esc(t.frag)}"</div><div class="muted" style="margin-top:6px">A page of Venn's notebook${hn?` &middot; solved with ${hn} hint${hn>1?'s':''}`:''}</div></div>`;
+  const hn=S.hints[t.id]||0,m=S.marks.filter(x=>x.task===t.id).reduce((a,x)=>a+x.p,0);
+  return `<div class="donebox"><span class="stamp">Sealed</span><div class="frag">"${esc(t.frag)}"</div><div class="muted" style="margin-top:6px">${m} marks${hn?` &middot; ${hn} hint${hn>1?'s':''} used`:''}</div></div>`;
 }
-function complete(t,journal){
+function complete(t,journal,bonus,bonusWhy){
   S.done[t.id]=Date.now();if(journal)S.journal[t.id]=journal;
-  const i=T.indexOf(t);S.sel=i+1<T.length?i+1:i;save();status();renderPath();
-  showModal(t,i);
+  const items=[{p:50,why:'seal: '+t.title}];if(bonus>0)items.push({p:bonus,why:bonusWhy});
+  items.forEach(x=>S.marks.push({p:x.p,why:x.why,d:dayKey(),task:t.id}));
+  touch('task');
+  const i=T.indexOf(t);S.sel=null;save();refresh();
+  showModal(t,i,items);
 }
-function showModal(t,i){
-  const last=i===T.length-1,m=document.getElementById('modal');
+function showModal(t,i,items){
+  const last=i===T.length-1,m=document.getElementById('modal'),tot=items.reduce((a,x)=>a+x.p,0);
+  const nxt=last?null:st(i+1);
   document.getElementById('modalCard').innerHTML=`<div class="kicker">Seal earned</div><h2>${esc(t.title)}</h2>
-   <p>You've earned a page of Venn's notebook:</p><div class="frag">"${esc(t.frag)}"</div>
-   ${last?`<p style="margin-top:16px"><b>Chapter One is complete.</b> You are now a Journeyman of the First Bench. Open the box: whatever's inside is yours.</p><p class="muted">Chapter Two: <i>The Lying Pins</i>, is being written.</p>`:`<p class="muted" style="margin-top:14px">Next: ${esc(T[i+1].title)}</p>`}
-   <button class="btn" id="mClose">${last?'Close the ledger':'To the next task'}</button>`;
+   <div class="marks">${items.map(x=>`<div><span>${esc(x.why)}</span><b>+${x.p}</b></div>`).join('')}<div class="tot"><span>Marks earned</span><b>+${tot}</b></div></div>
+   <p>And a page of Venn's notebook:</p><div class="frag">"${esc(t.frag)}"</div>
+   ${last?`<p style="margin-top:16px"><b>Chapter One is complete.</b> You are now a Journeyman of the First Bench. Whatever's inside the box is yours.</p><p class="muted">Chapter Two: <i>The Lying Pins</i>, is being written.</p>`
+     :nxt==='tomorrow'?`<p class="muted" style="margin-top:14px">Next: <b>${esc(T[i+1].title)}</b> opens tomorrow. Streak: ${streak()} ${streak()===1?'day':'days'}.</p>`
+     :`<p class="muted" style="margin-top:14px">Next: ${esc(T[i+1].title)}</p>`}
+   <button class="btn" id="mClose">${last?'Close the ledger':nxt==='tomorrow'?'Until tomorrow':'To the next task'}</button>`;
   m.classList.add('on');document.getElementById('mClose').onclick=()=>{m.classList.remove('on');renderTask();window.scrollTo({top:0,behavior:'smooth'});};
 }
 
@@ -299,7 +437,7 @@ function gRegister(g,t){
 }
 function gQuiz(g,t){
   const picks=t.gate.qs.map(()=>null);
-  g.innerHTML=`<h3>Prove it</h3>`+t.gate.qs.map((q,qi)=>`<div class="q" data-q="${qi}"><div class="prompt">${qi+1}. ${q.p}</div><div class="opts">${q.o.map((o,oi)=>`<button class="opt" data-o="${oi}">${o}</button>`).join('')}</div><div class="fb"></div></div>`).join('')+`<button class="btn" id="go">Check my answers</button><div class="err" id="er"></div>`;
+  g.innerHTML=`<h3>Prove it</h3><p class="muted">All right on the first try: +20 bonus marks.</p>`+t.gate.qs.map((q,qi)=>`<div class="q" data-q="${qi}"><div class="prompt">${qi+1}. ${q.p}</div><div class="opts">${q.o.map((o,oi)=>`<button class="opt" data-o="${oi}">${o}</button>`).join('')}</div><div class="fb"></div></div>`).join('')+`<button class="btn" id="go">Check my answers</button><div class="err" id="er"></div>`;
   g.querySelectorAll('.q').forEach(qd=>{const qi=+qd.dataset.q;qd.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{qd.querySelectorAll('.opt').forEach(x=>x.className='opt');b.classList.add('picked');picks[qi]=+b.dataset.o;qd.querySelector('.fb').textContent='';g.querySelector('#er').textContent='';});});
   g.querySelector('#go').onclick=()=>{
     if(picks.some(p=>p==null)){g.querySelector('#er').textContent='Answer every question first.';return;}
@@ -307,21 +445,22 @@ function gQuiz(g,t){
     g.querySelectorAll('.q').forEach(qd=>{const qi=+qd.dataset.q,q=t.gate.qs[qi],fb=qd.querySelector('.fb'),b=qd.querySelector(`.opt[data-o="${picks[qi]}"]`);
       if(picks[qi]===q.a){b.className='opt right';fb.className='fb good';fb.textContent='Right.';}
       else{ok=false;b.className='opt wrong';fb.className='fb bad';fb.textContent='Not quite. Check the Guild notes and try again.';}});
-    if(ok)setTimeout(()=>complete(t),600);};
+    if(!ok){S.wrong[t.id]=(S.wrong[t.id]||0)+1;save();}
+    else setTimeout(()=>complete(t,null,S.wrong[t.id]?0:20,'all right first try'),600);};
 }
 function gJournal(g,t){
-  g.innerHTML=`<h3>Write it in your ledger</h3>`+t.gate.ps.map((p,i)=>`<div class="q"><div class="prompt">${p}</div><textarea data-i="${i}"></textarea></div>`).join('')+
+  g.innerHTML=`<h3>Write it in your ledger</h3><p class="muted">Ledger notes earn +10 bonus marks.</p>`+t.gate.ps.map((p,i)=>`<div class="q"><div class="prompt">${p}</div><textarea data-i="${i}"></textarea></div>`).join('')+
   `<label class="chk"><input type="checkbox" id="did"> I really did this at my bench.</label><button class="btn" id="go">Seal it</button><div class="err" id="er"></div>`;
   const er=g.querySelector('#er');g.querySelectorAll('textarea,input').forEach(x=>x.oninput=x.onchange=()=>er.textContent='');
   g.querySelector('#go').onclick=()=>{
     const ans=[...g.querySelectorAll('textarea')].map(x=>x.value.trim());
     if(ans.some(a=>a.length<4)){er.textContent='Write a few words for each question. Future you will want to read them.';return;}
     if(!g.querySelector('#did').checked){er.textContent='Tick the box once you\'ve actually done it.';return;}
-    complete(t,t.gate.ps.map((p,i)=>({p,a:ans[i]})));};
+    complete(t,t.gate.ps.map((p,i)=>({p,a:ans[i]})),10,'ledger notes');};
 }
-function gCode(g,t,gate,extra){
+function gCode(g,t,gate,extra,extraBonus){
   gate=gate||t.gate;const used=()=>S.hints[t.id]||0;
-  g.innerHTML=`<h3>${gate.prompt}</h3><input type="text" id="ans" autocomplete="off" placeholder="Your answer"><button class="btn" id="go">Try it</button><div class="err" id="er"></div>
+  g.innerHTML=`<h3>${gate.prompt}</h3><p class="muted">No hints: +30 bonus marks. Each hint costs 10 of them.</p><input type="text" id="ans" autocomplete="off" placeholder="Your answer"><button class="btn" id="go">Try it</button><div class="err" id="er"></div>
    <div class="hints" id="hs"></div><button class="btn ghost" id="hb">Ask Tobias for a hint</button>`;
   const ans=g.querySelector('#ans'),er=g.querySelector('#er'),hs=g.querySelector('#hs'),hb=g.querySelector('#hb');
   function showHints(){hs.innerHTML=gate.hints.slice(0,used()).map(x=>`<div class="hint">${x}</div>`).join('');hb.style.display=used()>=gate.hints.length?'none':'';hb.textContent=used()?'Another hint':'Ask Tobias for a hint';}
@@ -329,12 +468,13 @@ function gCode(g,t,gate,extra){
   hb.onclick=()=>{S.hints[t.id]=used()+1;save();showHints();};
   ans.oninput=()=>er.textContent='';
   const go=()=>{const v=norm(ans.value).replace(/^(BEHINDTHE|BEHIND|THE)(?=.)/,'');if(!v){er.textContent='Type an answer first.';return;}
-    if(h(v)===gate.hash){complete(t,(extra||[]).concat([{p:gate.prompt,a:ans.value.trim()}]));}
-    else{er.textContent='That doesn\'t open it.';g.querySelector('#ans').classList.remove('shake');void ans.offsetWidth;ans.classList.add('shake');}};
+    if(h(v)===gate.hash){const b=Math.max(0,30-10*used())+(extraBonus||0);
+      complete(t,(extra||[]).concat([{p:gate.prompt,a:ans.value.trim()}]),b,used()?'solved with '+used()+' hint'+(used()>1?'s':''):'solved without hints');}
+    else{er.textContent='That doesn\'t open it.';ans.classList.remove('shake');void ans.offsetWidth;ans.classList.add('shake');}};
   g.querySelector('#go').onclick=go;ans.onkeydown=e=>{if(e.key==='Enter')go();};
 }
 function gExperiment(g,t){
-  g.innerHTML=`<h3>Record your trials</h3><p class="muted">Pins in this lock: <select id="np"><option>4</option><option>5</option></select></p><div id="tb"></div>
+  g.innerHTML=`<h3>Record your trials</h3><p class="muted">The finished experiment earns +20 bonus marks.</p><p class="muted">Pins in this lock: <select id="np"><option>4</option><option>5</option></select></p><div id="tb"></div>
    <div class="q" id="why" hidden><div class="prompt">Why does one pin bind before the others?</div><div class="opts">
    ${['The springs are different strengths','The pin holes are not perfectly in a straight line, so the plug catches one pin first','The front pin is always the tightest','The key pins are made of different metals'].map((o,i)=>`<button class="opt" data-o="${i}">${o}</button>`).join('')}</div><div class="fb"></div></div>
    <button class="btn" id="go">Compare my trials</button><div class="err" id="er"></div>`;
@@ -351,11 +491,12 @@ function gExperiment(g,t){
       if(orders.some(o=>new Set(o).size!==n)){er.textContent='Each trial should list every pin exactly once.';return;}
       const same=orders.every(o=>o.join()===orders[0].join());
       er.className='fb good';er.textContent=same?'All three trials agree: the pins bound in the same order every time. So the order belongs to the lock, not to luck.':'Your trials differ a little. That happens: tension changes things. But look how often the same pin binds first.';
-      why.hidden=false;stage=1;g.querySelector('#go').textContent='Answer and seal it';return;}
+      why.hidden=false;stage=1;g.querySelector('#go').textContent='Answer';return;}
     if(pick==null){er.className='err';er.textContent='Choose an answer to the question.';return;}
     const fb=why.querySelector('.fb');
     if(pick===1){fb.className='fb good';fb.textContent='Exactly. No lock is made perfectly. The holes are a fraction of a millimetre out of line, so under tension the plug catches one pin at a time. Find it, set it, find the next.';
-      const go=g.querySelector('#go');go.style.display='none';er.textContent='';const box=document.createElement('div');g.appendChild(box);gCode(box,t,t.gate.code,orders.map((o,i)=>({p:'Trial '+(i+1),a:o.join(' - ')})));}
+      g.querySelector('#go').style.display='none';er.textContent='';const box=document.createElement('div');g.appendChild(box);
+      gCode(box,t,t.gate.code,orders.map((o,i)=>({p:'Trial '+(i+1),a:o.join(' - ')})),20);}
     else{fb.className='fb bad';fb.textContent='Not quite. Ask yourself: if every pin were exactly in line, which one would bind first?';}
   };
 }
@@ -368,16 +509,25 @@ function renderNotebook(){
    (got.length<T.length?`<p class="muted">${T.length-got.length} pages still sealed.</p>`:'');
 }
 function renderLedger(){
+  const daysAt=Object.keys(S.days).filter(active).length;
   const rows=T.filter(t=>S.journal[t.id]).map(t=>`<div class="entry" style="border-bottom:1px solid var(--line);padding:10px 0"><b>${esc(t.title)}</b> <span class="muted">${new Date(S.done[t.id]).toLocaleDateString()}</span>${S.journal[t.id].map(x=>`<div class="muted" style="margin-top:4px">${esc(x.p)}</div><div>${esc(x.a)}</div>`).join('')}</div>`).join('');
-  document.getElementById('ledger').innerHTML=`<div class="kicker">${esc(S.name||'Unregistered apprentice')}</div><h2>My ledger</h2>${rows||'<p>Your notes from the bench will appear here.</p>'}
+  const pr=Object.entries(S.days).filter(([k,d])=>d.practice).sort().reverse().slice(0,10).map(([k,d])=>`<tr><td>${k}</td><td>${esc(d.practice.lock)}</td><td>${esc(d.practice.min)}</td></tr>`).join('');
+  const mk=S.marks.slice().reverse().slice(0,12).map(m=>`<tr><td>${m.d}</td><td>${esc(m.why)}</td><td style="text-align:right">+${m.p}</td></tr>`).join('');
+  document.getElementById('ledger').innerHTML=`<div class="kicker">${esc(S.name||'Unregistered apprentice')}</div><h2>My ledger</h2>
+   <div class="stats"><div><b>${totalMarks()}</b><span>marks</span></div><div><b>${streak()}</b><span>day streak</span></div><div><b>${daysAt}</b><span>days at the bench</span></div><div><b>${nDone()}/${T.length}</b><span>seals</span></div></div>
+   <h3>Notes from the bench</h3>${rows||'<p>Your notes from the bench will appear here.</p>'}
+   <h3>Practice log</h3>${pr?`<table class="log">${pr}</table>`:'<p class="muted">Log your practice on the bench page each day.</p>'}
+   <h3>Recent marks</h3>${mk?`<table class="log">${mk}</table>`:'<p class="muted">No marks yet.</p>'}
    <h3>Keep your progress safe</h3><p class="muted">Your progress is saved in this browser only. Copy this save code somewhere safe; paste it back to restore your progress on another device.</p>
    <textarea id="code" readonly></textarea><button class="btn ghost" id="cp">Copy save code</button>
    <h3>Restore</h3><textarea id="rst" placeholder="Paste a save code here"></textarea><button class="btn ghost" id="rs">Restore progress</button><div class="err" id="er"></div>`;
   const code=btoa(unescape(encodeURIComponent(JSON.stringify(S))));
   document.getElementById('code').value=code;
-  document.getElementById('cp').onclick=async()=>{try{await navigator.clipboard.writeText(code);document.getElementById('cp').textContent='Copied';}catch(e){const c=document.getElementById('code');c.select();document.getElementById('cp').textContent='Selected: press Ctrl+C';}};
+  document.getElementById('cp').onclick=async()=>{try{await navigator.clipboard.writeText(code);document.getElementById('cp').textContent='Copied';}catch(e){document.getElementById('code').select();document.getElementById('cp').textContent='Selected: press Ctrl+C';}};
   document.getElementById('rs').onclick=()=>{const er=document.getElementById('er');
-    try{const o=JSON.parse(decodeURIComponent(escape(atob(document.getElementById('rst').value.trim()))));if(!o||typeof o.done!=='object')throw 0;S=Object.assign({name:'',done:{},journal:{},hints:{},sel:null},o);save();status();renderPath();renderTask();renderLedger();document.getElementById('er').className='fb good';document.getElementById('er').textContent='Progress restored.';}
+    try{const o=JSON.parse(decodeURIComponent(escape(atob(document.getElementById('rst').value.trim()))));if(!o||typeof o.done!=='object')throw 0;
+      S=Object.assign({name:'',done:{},journal:{},hints:{},sel:null,marks:[],days:{},wrong:{}},o);save();refresh();renderTask();renderLedger();
+      const e2=document.getElementById('er');e2.className='fb good';e2.textContent='Progress restored.';}
     catch(e){er.className='err';er.textContent='That save code didn\'t work. Check you pasted all of it.';}};
 }
 
@@ -385,8 +535,15 @@ function renderLedger(){
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
   const v=b.dataset.view;document.getElementById('vBench').hidden=v!=='bench';document.getElementById('vNotebook').hidden=v!=='notebook';document.getElementById('vLedger').hidden=v!=='ledger';
-  if(v==='notebook')renderNotebook();if(v==='ledger')renderLedger();});
-load();if(S.sel!=null&&!isOpen(S.sel))S.sel=null;status();renderPath();renderTask();
+  if(v==='notebook')renderNotebook();if(v==='ledger')renderLedger();if(v==='bench')renderToday();});
+load();
+T.forEach(t=>{const ts=S.done[t.id];if(!ts)return;
+  if(!S.marks.some(m=>m.task===t.id))S.marks.push({p:50,why:'seal: '+t.title,d:dayKey(new Date(ts)),task:t.id});
+  const k=dayKey(new Date(ts));(S.days[k]=S.days[k]||{}).task=true;});
+save();
+if(S.sel!=null&&!isOpen(S.sel))S.sel=null;refresh();renderTask();
+if(!PACING)toast('Workshop mode: the one-task-a-day rule is off.');
+
 </script>
 </body>
 </html>

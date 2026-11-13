@@ -137,6 +137,8 @@ table.log{border-collapse:collapse;width:100%;font-size:15px}table.log td{paddin
 .flame.lit svg{filter:drop-shadow(0 0 5px #e88a2e88);animation:flick 1.6s infinite;transform-origin:50% 90%}
 .aDaily{margin-top:18px}.aDaily .today{margin-bottom:0}
 .dh{font-size:21px!important;margin-bottom:2px!important}
+.dbar .goal{color:#cdbd9c;font-size:14px;border-left:1px solid #4a3d30;padding-left:12px}
+.goalflame{display:flex;justify-content:center;margin:6px 0}.goalflame svg{width:56px;height:70px}.goalflame path{fill:url(#fl);stroke:#b8402c}
 footer{text-align:center;color:#6f6250;font-size:13px;padding:0 20px 30px}
 </style>
 </head>
@@ -182,7 +184,25 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 function dayKey(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function today(){const k=dayKey();return S.days[k]||(S.days[k]={});}
 function touch(kind){today()[kind]=true;save();}
-function active(k){const d=S.days[k];return !!(d&&(d.task||d.practice||d.q));}
+function doneToday(d){d=d||{};return (d.task?1:0)+(d.practice?1:0)+(d.q?1:0);}
+const GOAL=2;   /* daily goal: any two of question, practice, task */
+function active(k){const d=S.days[k];return !!(d&&(d.legacy||doneToday(d)>=GOAL));}
+let pendingGoal=false,modalOpen=false;
+function checkGoal(){const d=today();if(d.goalShown||doneToday(d)<GOAL)return;
+  d.goalShown=true;S.marks.push({p:10,why:'daily goal',d:dayKey()});save();
+  if(modalOpen)pendingGoal=true;else showGoal();}
+function showGoal(){
+  const m=document.getElementById('modal'),sk=streak(),tm=S.marks.filter(x=>x.d===dayKey()).reduce((a,x)=>a+x.p,0);
+  document.getElementById('modalCard').innerHTML=`<div class="kicker">Daily goal complete</div><h2>Great work today.</h2>
+   <div class="goalflame">${FLAME}</div>
+   <p style="text-align:center"><b>${sk}</b> day streak &middot; <b>${tm}</b> marks today (including a 10-mark goal bonus)</p>
+   <div class="letter"><p>That's a proper day at the bench. Rest your fingers, or carry on if you're on a roll. Your choice.</p><div class="sig">T. M.</div></div>
+   <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="gKeep">Keep going</button><button class="btn ghost" id="gDone">Done for today</button></div>`;
+  m.classList.add('on');modalOpen=true;
+  const close=()=>{m.classList.remove('on');modalOpen=false;refresh();renderTask();};
+  document.getElementById('gKeep').onclick=close;
+  document.getElementById('gDone').onclick=()=>{today().rest=true;save();close();window.scrollTo({top:0,behavior:'smooth'});};
+}
 function streak(){let n=0;const d=new Date();if(!active(dayKey(d)))d.setDate(d.getDate()-1);
   while(active(dayKey(d))){n++;d.setDate(d.getDate()-1);}return n;}
 function totalMarks(){return S.marks.reduce((a,m)=>a+m.p,0);}
@@ -316,8 +336,7 @@ function st(i){
   if(S.done[T[i].id])return 'done';
   if(i===0)return 'open';
   const prev=S.done[T[i-1].id];if(!prev)return 'locked';
-  if(i<=3||!PACING)return 'open';   /* the first four tasks are the induction: all on day one */
-  return dayKey(new Date(prev))===dayKey()?'tomorrow':'open';
+  return 'open';
 }
 const isOpen=i=>st(i)==='open'||st(i)==='done';
 function rank(){let r='Novice';for(const[n,name]of ranks)if(nDone()>=n)r=name;return r;}
@@ -344,16 +363,16 @@ function current(){
 /* ---------- daily bar (top) and daily bench card (side) ---------- */
 const FLAME=`<svg viewBox="0 0 24 30" width="22" height="28" aria-hidden="true"><defs><linearGradient id="fl" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#b8402c"/><stop offset=".55" stop-color="#e88a2e"/><stop offset="1" stop-color="#ffd36b"/></linearGradient></defs><path d="M12 1c2 6 9 9 9 17a9 9 0 0 1-18 0c0-5 3-7 4-11 1 3 2 5 4 6 0-5-1-8 1-12z"/></svg>`;
 function renderToday(){
-  const d=today(),sk=streak(),lit=!!(d.task||d.practice||d.q);
+  const d=today(),sk=streak(),n=doneToday(d),lit=n>=GOAL;
   const pool=REVIEW.map((q,i)=>({...q,i})).filter(q=>S.done[q.req]);
   const c=current();let tLine;
   if(nDone()===T.length)tLine='Chapter One complete';
-  else if(c.wait!=null)tLine=`Next task opens tomorrow`;
-  else tLine=`Open now: <b>${esc(T[c.i].title)}</b>`;
+  else if(lit&&d.rest)tLine=`Done for today. See you tomorrow.`;
+  else tLine=`${lit?'Bonus round':'Open now'}: <b>${esc(T[c.i].title)}</b>`;
   const tick=(b,l)=>`<span class="ti"><span class="tick ${b?'on':''}">${b?'&#10003;':''}</span>${l}</span>`;
   document.getElementById('today').innerHTML=`<div class="dbar">
-    <span class="flame ${lit?'lit':''}" title="${lit?'Today\'s flame is lit':'Light today\'s flame: answer the question, log practice or seal a task'}">${FLAME}</span>
-    <span class="sk"><b>${sk}</b> day streak</span>
+    <span class="flame ${lit?'lit':''}" title="${lit?'Daily goal complete':'Do any two: question, practice, task'}">${FLAME}</span>
+    <span class="sk"><b>${sk}</b> day streak</span><span class="goal">${lit?'Daily goal complete &#10003;':'Daily goal: '+n+' of '+GOAL}</span>
     <span class="ticks">${tick(d.q,'Question')}${tick(d.practice,'Practice')}${tick(d.task,'Task')}</span>
     <span class="tl">${tLine}</span></div>`;
   let qHtml;
@@ -367,14 +386,14 @@ function renderToday(){
     <select id="pMin"><option value="">How long?</option><option>5 minutes</option><option>10 minutes</option><option>20 minutes</option><option>30+ minutes</option></select>
     <button class="btn small" id="pGo">Log it</button></div><div class="err" id="pEr"></div>`;
   const el=document.getElementById('daily');
-  el.innerHTML=`<div class="today"><h4 class="dh">Daily bench</h4><p class="muted">Either of these keeps your streak alive.</p>
+  el.innerHTML=`<div class="today"><h4 class="dh">Daily bench</h4><p class="muted">Daily goal: any two of the question, practice and a task. Meet it to grow your streak.</p>
     <h4>Question of the day</h4>${qHtml}<h4 style="margin-top:14px">Bench practice</h4>${pHtml}</div>`;
   el.querySelectorAll('.opt[data-qi]').forEach(b=>b.onclick=()=>{const qi=+b.dataset.qi,ok=+b.dataset.o===REVIEW[qi].a;
-    d.q={i:qi,ok};save();if(ok)award(10,'question of the day');refresh();});
+    d.q={i:qi,ok};save();if(ok)award(10,'question of the day');checkGoal();refresh();});
   const go=el.querySelector('#pGo');
   if(go)go.onclick=()=>{const l=el.querySelector('#pLock').value,m=el.querySelector('#pMin').value;
     if(!l||!m){el.querySelector('#pEr').textContent='Choose the lock and how long first.';return;}
-    d.practice={lock:l,min:m};save();award(10,'bench practice');refresh();};
+    d.practice={lock:l,min:m};save();award(10,'bench practice');checkGoal();refresh();};
 }
 function refresh(){status();renderPath();renderToday();}
 
@@ -407,7 +426,7 @@ function complete(t,journal,bonus,bonusWhy){
   items.forEach(x=>S.marks.push({p:x.p,why:x.why,d:dayKey(),task:t.id}));
   touch('task');
   const i=T.indexOf(t);S.sel=null;save();refresh();
-  showModal(t,i,items);
+  showModal(t,i,items);checkGoal();
 }
 function showModal(t,i,items){
   const last=i===T.length-1,m=document.getElementById('modal'),tot=items.reduce((a,x)=>a+x.p,0);
@@ -416,10 +435,9 @@ function showModal(t,i,items){
    <div class="marks">${items.map(x=>`<div><span>${esc(x.why)}</span><b>+${x.p}</b></div>`).join('')}<div class="tot"><span>Marks earned</span><b>+${tot}</b></div></div>
    <p>And a page of Venn's notebook:</p><div class="frag">"${esc(t.frag)}"</div>
    ${last?`<p style="margin-top:16px"><b>Chapter One is complete.</b> You are now a Journeyman of the First Bench. Whatever's inside the box is yours.</p><p class="muted">Chapter Two: <i>The Lying Pins</i>, is being written.</p>`
-     :nxt==='tomorrow'?`<p class="muted" style="margin-top:14px">Next: <b>${esc(T[i+1].title)}</b> opens tomorrow. Streak: ${streak()} ${streak()===1?'day':'days'}.</p>`
      :`<p class="muted" style="margin-top:14px">Next: ${esc(T[i+1].title)}</p>`}
-   <button class="btn" id="mClose">${last?'Close the ledger':nxt==='tomorrow'?'Until tomorrow':'To the next task'}</button>`;
-  m.classList.add('on');document.getElementById('mClose').onclick=()=>{m.classList.remove('on');renderTask();window.scrollTo({top:0,behavior:'smooth'});};
+   <button class="btn" id="mClose">${last?'Close the ledger':'To the next task'}</button>`;
+  m.classList.add('on');modalOpen=true;document.getElementById('mClose').onclick=()=>{m.classList.remove('on');modalOpen=false;if(pendingGoal){pendingGoal=false;showGoal();return;}renderTask();window.scrollTo({top:0,behavior:'smooth'});};
 }
 
 /* ---------- gates ---------- */
@@ -539,10 +557,10 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
 load();
 T.forEach(t=>{const ts=S.done[t.id];if(!ts)return;
   if(!S.marks.some(m=>m.task===t.id))S.marks.push({p:50,why:'seal: '+t.title,d:dayKey(new Date(ts)),task:t.id});
-  const k=dayKey(new Date(ts));(S.days[k]=S.days[k]||{}).task=true;});
+  const k=dayKey(new Date(ts));const dd=(S.days[k]=S.days[k]||{});if(k!==dayKey())dd.legacy=true;dd.task=true;});
 save();
 if(S.sel!=null&&!isOpen(S.sel))S.sel=null;refresh();renderTask();
-if(!PACING)toast('Workshop mode: the one-task-a-day rule is off.');
+
 
 </script>
 </body>

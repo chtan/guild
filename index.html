@@ -95,8 +95,8 @@ svg text{font-family:Lora,serif}
 .modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
 .modal.on{display:flex}
 .modal .card{max-width:440px;width:100%}
-.flash{animation:flash 1.2s}
-@keyframes flash{0%{transform:scale(.92);opacity:0}60%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
+.flash{animation:flash .35s ease-out}
+@keyframes flash{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .today{background:#2a221b;border:1px solid #4a3d30;border-radius:6px;color:#e6d8b8;padding:16px 18px;margin-bottom:18px;font-size:15px}
 .today h4{font-family:"IM Fell English",serif;font-weight:400;font-size:18px;color:var(--brass);margin:0 0 6px}
 .today p{margin:0 0 6px}.today .muted{color:#a8977a;font-size:14px}

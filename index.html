@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Apprentice's Ledger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Lora:ital,wght@0,400;0,600;1,400&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#1c1712; --ink2:#2a221b; --paper:#f2e8d2; --paper2:#e8dbbd; --line:#cbb894;
@@ -139,6 +139,27 @@ table.log{border-collapse:collapse;width:100%;font-size:15px}table.log td{paddin
 .dh{font-size:21px!important;margin-bottom:2px!important}
 .dbar .goal{color:#cdbd9c;font-size:14px;border-left:1px solid #4a3d30;padding-left:12px}
 .goalflame{display:flex;justify-content:center;margin:6px 0}.goalflame svg{width:56px;height:70px}.goalflame path{fill:url(#fl);stroke:#b8402c}
+nav .snd{margin-left:10px;font-size:13px;padding:6px 12px;color:#a8977a}
+.ceremony{text-align:center}.sealrow{display:flex;justify-content:center;align-items:center;gap:14px;height:96px;margin:-4px 0 4px}
+.padlk .shackle{transform-box:fill-box;transform-origin:100% 100%}
+.play .padlk .shackle{animation:shackle .3s .12s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes shackle{to{transform:translateY(-6px) rotate(-28deg)}}
+.wax{opacity:0}.play .wax{animation:stamp .45s .45s cubic-bezier(.5,0,.6,1.4) both}
+.done .wax{opacity:1;transform:rotate(-4deg)}.done .padlk .shackle{transform:translateY(-6px) rotate(-28deg)}
+@keyframes stamp{0%{opacity:0;transform:scale(2.4) rotate(-14deg)}70%{opacity:1;transform:scale(.93) rotate(1deg)}100%{opacity:1;transform:scale(1) rotate(-4deg)}}
+.thump{animation:thump .22s}@keyframes thump{30%{transform:translateY(3px)}}
+.marks .row{opacity:0;transform:translateX(-8px);transition:opacity .25s,transform .25s}.marks .row.in{opacity:1;transform:none}
+.pagewrap{perspective:700px;margin:6px 0 4px}
+.npage{background:#fbf6e9 repeating-linear-gradient(transparent 0 27px,#d9cdb0 27px 28px);border:1px solid var(--line);border-radius:3px;padding:10px 16px 12px;transform-origin:50% 0;box-shadow:0 2px 6px #0002}
+.play:not(.done):not(.unfold) .npage{transform:rotateX(-90deg);opacity:0}
+.unfold .npage{animation:unfold .6s cubic-bezier(.2,.8,.3,1.1) both}
+@keyframes unfold{from{transform:rotateX(-90deg);opacity:0}to{transform:none;opacity:1}}
+.nlabel{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.hand{font-family:Caveat,cursive;font-size:27px;line-height:28px;color:#2d2a4a;margin-top:2px}
+.play:not(.done) .after{opacity:0;pointer-events:none}.after{transition:opacity .3s}
+.ignite .goalflame svg{animation:ignite .7s cubic-bezier(.3,1.5,.5,1) both;filter:drop-shadow(0 0 10px #e88a2e)}
+@keyframes ignite{0%{transform:scale(.2);opacity:0}60%{transform:scale(1.18);opacity:1}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.play .wax,.unfold .npage,.ignite .goalflame svg,.thump,.flash{animation:none!important}}
 footer{text-align:center;color:#6f6250;font-size:13px;padding:0 20px 30px}
 </style>
 </head>
@@ -154,6 +175,7 @@ footer{text-align:center;color:#6f6250;font-size:13px;padding:0 20px 30px}
   <button data-view="bench" class="on">The bench</button>
   <button data-view="notebook">Venn's notebook</button>
   <button data-view="ledger">My ledger</button>
+  <button id="snd" class="snd" title="Sound effects">Sound: on</button>
 </nav>
 <main>
   <section id="vBench" class="layout">
@@ -199,9 +221,10 @@ function showGoal(){
    <div class="letter"><p>That's a proper day at the bench. Rest your fingers, or carry on if you're on a roll. Your choice.</p><div class="sig">T. M.</div></div>
    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="gKeep">Keep going</button><button class="btn ghost" id="gDone">Done for today</button></div>`;
   m.classList.add('on');modalOpen=true;
-  const close=()=>{m.classList.remove('on');modalOpen=false;refresh();renderTask();};
+  const gc=document.getElementById('modalCard');gc.className='card';if(!reduced()){void gc.offsetWidth;gc.classList.add('ignite');SFX.whoomp();setTimeout(SFX.chime,350);}
+  const close=()=>{m.classList.remove('on');modalOpen=false;window.scrollTo(0,0);refresh();renderTask();};
   document.getElementById('gKeep').onclick=close;
-  document.getElementById('gDone').onclick=()=>{today().rest=true;save();close();window.scrollTo({top:0,behavior:'smooth'});};
+  document.getElementById('gDone').onclick=()=>{today().rest=true;save();close();};
 }
 function streak(){let n=0;const d=new Date();if(!active(dayKey(d)))d.setDate(d.getDate()-1);
   while(active(dayKey(d))){n++;d.setDate(d.getDate()-1);}return n;}
@@ -209,6 +232,25 @@ function totalMarks(){return S.marks.reduce((a,m)=>a+m.p,0);}
 function award(p,why){if(p<=0)return;S.marks.push({p,why,d:dayKey()});save();toast('+'+p+' marks: '+why);}
 let toastT;
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600);}
+
+/* ---------- sound: small effects made in the browser, no files ---------- */
+let AC=null;
+const soundOn=()=>S.sound!==false;
+function ac(){if(!soundOn())return null;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC;}catch(e){return null;}}
+function env(g,t,a,peak,d){g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+a+d);}
+function noise(c,dur){const b=c.createBuffer(1,Math.ceil(c.sampleRate*dur),c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const s=c.createBufferSource();s.buffer=b;return s;}
+function tone(c,type,f1,f2,t,dur,peak){const o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f1,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);env(g,t,0.005,peak,dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+0.05);}
+function burst(c,t,dur,ftype,freq,peak,f2){const n=noise(c,dur+0.05),f=c.createBiquadFilter(),g=c.createGain();f.type=ftype;f.frequency.setValueAtTime(freq,t);if(f2)f.frequency.exponentialRampToValueAtTime(f2,t+dur);env(g,t,0.004,peak,dur);n.connect(f).connect(g).connect(c.destination);n.start(t);n.stop(t+dur+0.05);}
+const SFX={
+  click(){const c=ac();if(!c)return;const t=c.currentTime;burst(c,t,0.03,'highpass',2500,0.5);tone(c,'square',2200,1400,t,0.03,0.06);burst(c,t+0.07,0.04,'highpass',1800,0.4);},
+  thud(){const c=ac();if(!c)return;const t=c.currentTime;tone(c,'sine',140,45,t,0.32,0.9);burst(c,t,0.12,'lowpass',600,0.6);},
+  tick(){const c=ac();if(!c)return;tone(c,'triangle',1320,0,c.currentTime,0.05,0.18);},
+  swish(){const c=ac();if(!c)return;burst(c,c.currentTime,0.38,'bandpass',700,0.35,3200);},
+  chime(){const c=ac();if(!c)return;const t=c.currentTime;[659,988,1319].forEach((f,i)=>tone(c,'sine',f,0,t+i*0.09,0.6,0.22));},
+  clunk(){const c=ac();if(!c)return;const t=c.currentTime;tone(c,'square',110,70,t,0.14,0.12);burst(c,t,0.08,'lowpass',400,0.3);},
+  whoomp(){const c=ac();if(!c)return;const t=c.currentTime;burst(c,t,0.5,'lowpass',200,0.5,2400);tone(c,'sine',220,440,t+0.1,0.5,0.25);}
+};
+const reduced=()=>window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- the pin tumbler drawing ---------- */
 const PIN_SVG=`<svg viewBox="0 0 520 262" width="100%" role="img" aria-label="Cross-section of a pin-tumbler lock">
@@ -389,11 +431,11 @@ function renderToday(){
   el.innerHTML=`<div class="today"><h4 class="dh">Daily bench</h4><p class="muted">Daily goal: any two of the question, practice and a task. Meet it to grow your streak.</p>
     <h4>Question of the day</h4>${qHtml}<h4 style="margin-top:14px">Bench practice</h4>${pHtml}</div>`;
   el.querySelectorAll('.opt[data-qi]').forEach(b=>b.onclick=()=>{const qi=+b.dataset.qi,ok=+b.dataset.o===REVIEW[qi].a;
-    d.q={i:qi,ok};save();if(ok)award(10,'question of the day');checkGoal();refresh();});
+    d.q={i:qi,ok};save();if(ok){award(10,'question of the day');SFX.chime();}else SFX.clunk();checkGoal();refresh();});
   const go=el.querySelector('#pGo');
   if(go)go.onclick=()=>{const l=el.querySelector('#pLock').value,m=el.querySelector('#pMin').value;
     if(!l||!m){el.querySelector('#pEr').textContent='Choose the lock and how long first.';return;}
-    d.practice={lock:l,min:m};save();award(10,'bench practice');checkGoal();refresh();};
+    d.practice={lock:l,min:m};save();award(10,'bench practice');SFX.tick();checkGoal();refresh();};
 }
 function refresh(){status();renderPath();renderToday();}
 
@@ -428,16 +470,35 @@ function complete(t,journal,bonus,bonusWhy){
   const i=T.indexOf(t);S.sel=null;save();refresh();
   showModal(t,i,items);checkGoal();
 }
+const PADLOCK=`<svg class="padlk" viewBox="0 0 48 60" width="46" height="58" aria-hidden="true"><path class="shackle" d="M12 28V18a12 12 0 0 1 24 0v10" fill="none" stroke="#c9b07a" stroke-width="5" stroke-linecap="round"/><rect x="5" y="27" width="38" height="29" rx="5" fill="#b8893b" stroke="#8a6424" stroke-width="1.5"/><circle cx="24" cy="39" r="4" fill="#5a4630"/><rect x="22.5" y="41" width="3" height="8" rx="1.5" fill="#5a4630"/></svg>`;
+const WAX=`<svg class="wax" viewBox="0 0 100 100" width="92" height="92" aria-hidden="true"><path d="M50 4c8 0 10 5 17 7s12 0 16 6 1 11 4 17 9 9 8 16-7 9-8 16 2 11-4 16-11 3-16 7-9 7-17 7-10-5-17-7-12 0-16-6-1-11-4-17-9-9-8-16 7-9 8-16-2-11 4-16 11-3 16-7 9-7 17-7z" fill="#8e2b22"/><circle cx="50" cy="50" r="31" fill="none" stroke="#6e1f19" stroke-width="3"/><circle cx="50" cy="50" r="31" fill="none" stroke="#b4483c" stroke-width="1" transform="translate(-1 -1)"/><circle cx="50" cy="44" r="8" fill="#6e1f19"/><path d="M45 48h10l3 18H42z" fill="#6e1f19"/><circle cx="49" cy="43" r="8" fill="none" stroke="#c1574a" stroke-width="1"/></svg>`;
+let ceremony=[];
+function later(ms,fn){ceremony.push(setTimeout(fn,ms));}
 function showModal(t,i,items){
-  const last=i===T.length-1,m=document.getElementById('modal'),tot=items.reduce((a,x)=>a+x.p,0);
-  const nxt=last?null:st(i+1);
-  document.getElementById('modalCard').innerHTML=`<div class="kicker">Seal earned</div><h2>${esc(t.title)}</h2>
-   <div class="marks">${items.map(x=>`<div><span>${esc(x.why)}</span><b>+${x.p}</b></div>`).join('')}<div class="tot"><span>Marks earned</span><b>+${tot}</b></div></div>
-   <p>And a page of Venn's notebook:</p><div class="frag">"${esc(t.frag)}"</div>
-   ${last?`<p style="margin-top:16px"><b>Chapter One is complete.</b> You are now a Journeyman of the First Bench. Whatever's inside the box is yours.</p><p class="muted">Chapter Two: <i>The Lying Pins</i>, is being written.</p>`
+  const last=i===T.length-1,m=document.getElementById('modal'),tot=items.reduce((a,x)=>a+x.p,0),card=document.getElementById('modalCard');
+  card.innerHTML=`<div class="ceremony"><div class="sealrow">${PADLOCK}${WAX}</div><div class="kicker">Seal earned</div><h2>${esc(t.title)}</h2></div>
+   <div class="marks">${items.map(x=>`<div class="row"><span>${esc(x.why)}</span><b>+${x.p}</b></div>`).join('')}<div class="row tot"><span>Marks earned</span><b>+${tot}</b></div></div>
+   <div class="pagewrap"><div class="npage"><div class="nlabel">A page of Venn's notebook</div><div class="hand">${esc(t.frag)}</div></div></div>
+   <div class="after">${last?`<p style="margin-top:16px"><b>Chapter One is complete.</b> You are now a Journeyman of the First Bench. Whatever's inside the box is yours.</p><p class="muted">Chapter Two: <i>The Lying Pins</i>, is being written.</p>`
      :`<p class="muted" style="margin-top:14px">Next: ${esc(T[i+1].title)}</p>`}
-   <button class="btn" id="mClose">${last?'Close the ledger':'To the next task'}</button>`;
-  m.classList.add('on');modalOpen=true;document.getElementById('mClose').onclick=()=>{m.classList.remove('on');modalOpen=false;if(pendingGoal){pendingGoal=false;showGoal();return;}renderTask();window.scrollTo({top:0,behavior:'smooth'});};
+   <button class="btn" id="mClose">${last?'Close the ledger':'To the next task'}</button></div>`;
+  m.classList.add('on');modalOpen=true;
+  ceremony.forEach(clearTimeout);ceremony=[];
+  const rows=[...card.querySelectorAll('.marks .row')];
+  const finish=()=>{ceremony.forEach(clearTimeout);ceremony=[];card.classList.add('done');rows.forEach(r=>r.classList.add('in'));};
+  if(reduced()){finish();}
+  else{
+    card.classList.add('play');
+    later(150,SFX.click);
+    later(760,()=>{SFX.thud();card.classList.add('thump');});
+    rows.forEach((r,k)=>later(1050+k*200,()=>{r.classList.add('in');SFX.tick();}));
+    const tPage=1100+rows.length*200;
+    later(tPage,()=>{card.classList.add('unfold');SFX.swish();});
+    later(tPage+700,finish);
+    card.onclick=e=>{if(!card.classList.contains('done')&&e.target.id!=='mClose')finish();};
+  }
+  document.getElementById('mClose').onclick=()=>{ceremony.forEach(clearTimeout);ceremony=[];card.className='card';card.onclick=null;
+    m.classList.remove('on');modalOpen=false;if(pendingGoal){pendingGoal=false;showGoal();return;}window.scrollTo(0,0);renderTask();};
 }
 
 /* ---------- gates ---------- */
@@ -463,7 +524,7 @@ function gQuiz(g,t){
     g.querySelectorAll('.q').forEach(qd=>{const qi=+qd.dataset.q,q=t.gate.qs[qi],fb=qd.querySelector('.fb'),b=qd.querySelector(`.opt[data-o="${picks[qi]}"]`);
       if(picks[qi]===q.a){b.className='opt right';fb.className='fb good';fb.textContent='Right.';}
       else{ok=false;b.className='opt wrong';fb.className='fb bad';fb.textContent='Not quite. Check the Guild notes and try again.';}});
-    if(!ok){S.wrong[t.id]=(S.wrong[t.id]||0)+1;save();}
+    if(!ok){S.wrong[t.id]=(S.wrong[t.id]||0)+1;save();SFX.clunk();}
     else setTimeout(()=>complete(t,null,S.wrong[t.id]?0:20,'all right first try'),600);};
 }
 function gJournal(g,t){
@@ -483,12 +544,12 @@ function gCode(g,t,gate,extra,extraBonus){
   const ans=g.querySelector('#ans'),er=g.querySelector('#er'),hs=g.querySelector('#hs'),hb=g.querySelector('#hb');
   function showHints(){hs.innerHTML=gate.hints.slice(0,used()).map(x=>`<div class="hint">${x}</div>`).join('');hb.style.display=used()>=gate.hints.length?'none':'';hb.textContent=used()?'Another hint':'Ask Tobias for a hint';}
   showHints();
-  hb.onclick=()=>{S.hints[t.id]=used()+1;save();showHints();};
+  hb.onclick=()=>{S.hints[t.id]=used()+1;save();showHints();SFX.swish();};
   ans.oninput=()=>er.textContent='';
   const go=()=>{const v=norm(ans.value).replace(/^(BEHINDTHE|BEHIND|THE)(?=.)/,'');if(!v){er.textContent='Type an answer first.';return;}
     if(h(v)===gate.hash){const b=Math.max(0,30-10*used())+(extraBonus||0);
       complete(t,(extra||[]).concat([{p:gate.prompt,a:ans.value.trim()}]),b,used()?'solved with '+used()+' hint'+(used()>1?'s':''):'solved without hints');}
-    else{er.textContent='That doesn\'t open it.';ans.classList.remove('shake');void ans.offsetWidth;ans.classList.add('shake');}};
+    else{SFX.clunk();er.textContent='That doesn\'t open it.';ans.classList.remove('shake');void ans.offsetWidth;ans.classList.add('shake');}};
   g.querySelector('#go').onclick=go;ans.onkeydown=e=>{if(e.key==='Enter')go();};
 }
 function gExperiment(g,t){
@@ -550,11 +611,13 @@ function renderLedger(){
 }
 
 /* ---------- views ---------- */
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+document.querySelectorAll('nav button[data-view]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button[data-view]').forEach(x=>x.classList.toggle('on',x===b));
   const v=b.dataset.view;document.getElementById('vBench').hidden=v!=='bench';document.getElementById('vNotebook').hidden=v!=='notebook';document.getElementById('vLedger').hidden=v!=='ledger';
   if(v==='notebook')renderNotebook();if(v==='ledger')renderLedger();if(v==='bench')renderToday();});
 load();
+const sndB=document.getElementById('snd');const sndLabel=()=>sndB.textContent='Sound: '+(soundOn()?'on':'off');sndLabel();
+sndB.onclick=()=>{S.sound=!soundOn();save();sndLabel();SFX.tick();};
 T.forEach(t=>{const ts=S.done[t.id];if(!ts)return;
   if(!S.marks.some(m=>m.task===t.id))S.marks.push({p:50,why:'seal: '+t.title,d:dayKey(new Date(ts)),task:t.id});
   const k=dayKey(new Date(ts));const dd=(S.days[k]=S.days[k]||{});if(k!==dayKey())dd.legacy=true;dd.task=true;});
